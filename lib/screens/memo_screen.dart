@@ -15,11 +15,9 @@ class _MemoScreenState extends State<MemoScreen> {
   final MemoRepository _memoRepository = MemoRepository();
   final ClassifierService _classifierService = ClassifierService();
 
-  final TextEditingController _titleController =
-      TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
 
-  final TextEditingController _contentController =
-      TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
 
   List<Memo> _memos = [];
 
@@ -42,14 +40,9 @@ class _MemoScreenState extends State<MemoScreen> {
     final title = _titleController.text;
     final content = _contentController.text;
 
-    final categoryId =
-        await _classifierService.predictCategory(content);
+    final categoryId = await _classifierService.predictCategory(content);
 
-    final memo = Memo(
-      title: title,
-      content: content,
-      categoryid: categoryId,
-    );
+    final memo = Memo(title: title, content: content, categoryid: categoryId);
 
     await _memoRepository.insertMemo(memo);
 
@@ -62,29 +55,20 @@ class _MemoScreenState extends State<MemoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Memo'),
-      ),
+      appBar: AppBar(title: const Text('Memo')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-              ),
+              decoration: const InputDecoration(labelText: 'Title'),
             ),
             TextField(
               controller: _contentController,
-              decoration: const InputDecoration(
-                labelText: 'Content',
-              ),
+              decoration: const InputDecoration(labelText: 'Content'),
             ),
-            ElevatedButton(
-              onPressed: _saveMemo,
-              child: const Text('Save'),
-            ),
+            ElevatedButton(onPressed: _saveMemo, child: const Text('Save')),
             const Divider(),
             Expanded(
               child: ListView.builder(
@@ -96,6 +80,13 @@ class _MemoScreenState extends State<MemoScreen> {
                     title: Text(memo.title),
                     subtitle: Text(
                       '${memo.content}\ncategoryId: ${memo.categoryid}',
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        await _memoRepository.deleteMemo(memo.id!);
+                        await _loadMemos();
+                      },
                     ),
                   );
                 },

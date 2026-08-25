@@ -19,7 +19,7 @@ class ClassifierService {
     // 3. pooling
     // 4. normalize
     // 5. embeddingを返す
-
+    return List<double>.filled(384, 0.0);
     throw UnimplementedError();
   }
 

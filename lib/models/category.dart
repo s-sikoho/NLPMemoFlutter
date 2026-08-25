@@ -15,7 +15,7 @@ class Category {
     return Category(
       id: map["id"] as int?,
       name: map["name"] as String,
-      isOther: map["is_system"] as bool,
+      isOther: map["isOther"] as bool,
     );
   }
 
@@ -23,7 +23,7 @@ class Category {
     return {
       "id": id,
       "name": name,
-      "is_system": isOther,
+      "isOther": isOther,
     };
   }
 }

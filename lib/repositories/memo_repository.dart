@@ -3,7 +3,6 @@ import '../models/memo.dart';
 
 class MemoRepository {
   final AppDatabase _appDatabase = AppDatabase.instance;
-
   Future<List<Memo>> getAllMemos() async {
     final db = await _appDatabase.database;
 
@@ -40,7 +39,7 @@ class MemoRepository {
 
   final maps = await db.query(
     'memos',
-    where: 'category_id = ?',
+    where: 'categoryid = ?',
     whereArgs: [categoryId],
   );
 

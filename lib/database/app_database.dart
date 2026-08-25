@@ -22,7 +22,6 @@ class AppDatabase {
     final dbPath = await getDatabasesPath();
 
     final path = join(dbPath, fileName);
-
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
@@ -31,7 +30,7 @@ class AppDatabase {
       CREATE TABLE categories(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        is_system INTEGER NOT NULL
+        isOther INTEGER NOT NULL
       )
     ''');
 
@@ -40,7 +39,7 @@ class AppDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
-        category_id INTEGER NOT NULL
+        categoryid INTEGER NOT NULL
       )
     ''');
 
@@ -49,10 +48,10 @@ class AppDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
-        category_id INTEGER NOT NULL
+        categoryid INTEGER NOT NULL
       )
     ''');
 
-    await db.insert("categories", {"id": 0, "name": "その他", "is_system": 1});
+    await db.insert("categories", {"id": 0, "name": "その他", "isOther": true});
   }
 }

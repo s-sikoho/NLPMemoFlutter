@@ -18,7 +18,7 @@ class Memo {
       id: map["id"] as int?,
       title: map["title"] as String,
       content: map["content"] as String,
-      categoryid: map["category_d"] as int,
+      categoryid: map["categoryid"] as int,
     );
   }
 

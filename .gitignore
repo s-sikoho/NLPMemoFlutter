@@ -47,3 +47,4 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 assets/models/model.onnx
+assets/models/e5/model.onnx

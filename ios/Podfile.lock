@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - rust_lib_nlpmemoflutter (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - rust_lib_nlpmemoflutter (from `.symlinks/plugins/rust_lib_nlpmemoflutter/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  rust_lib_nlpmemoflutter:
+    :path: ".symlinks/plugins/rust_lib_nlpmemoflutter/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  rust_lib_nlpmemoflutter: de5c8647ef5351eef36f0e1b3bfe8e34234cf3f4
+
+PODFILE CHECKSUM: 3ba3a73b1b12adcf321a227a745625fe0888cc82
+
+COCOAPODS: 1.16.2

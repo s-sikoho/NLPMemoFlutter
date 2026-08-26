@@ -7,17 +7,12 @@ class CategoryRepository {
   Future<List<Category>> getAllCategories() async {
     final db = await _appDatabase.database;
 
-    final maps = await db.query(
-      'categories',
-      orderBy: 'id ASC',
-    );
+    final maps = await db.query('categories', orderBy: 'id ASC');
 
-    return maps
-        .map((map) => Category.fromMap(map))
-        .toList();
+    return maps.map((map) => Category.fromMap(map)).toList();
   }
 
-  Future<Category?>getCategoryById(int id)async{
+  Future<Category?> getCategoryById(int id) async {
     final db = await _appDatabase.database;
 
     final maps = await db.query(
@@ -30,35 +25,28 @@ class CategoryRepository {
     if (maps.isEmpty) {
       return null;
     }
-     return Category.fromMap(maps.first);
+    return Category.fromMap(maps.first);
   }
 
   Future<int> insertCategory(Category category) async {
     final db = await _appDatabase.database;
 
-    return await db.insert(
-      'categories',
-      category.toMap(),
-    );
+    return await db.insert('categories', category.toMap());
   }
 
   Future<int> deleteCategory(int id) async {
-  final category = await getCategoryById(id);
+    final category = await getCategoryById(id);
 
-  if (category == null) {
-    throw StateError('Category not found.');
+    if (category == null) {
+      throw StateError('Category not found.');
+    }
+
+    if (category.isOther) {
+      throw StateError('Other category cannot be deleted.');
+    }
+
+    final db = await AppDatabase.instance.database;
+
+    return db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
-
-  if (category.isOther) {
-    throw StateError('Other category cannot be deleted.');
-  }
-
-  final db = await AppDatabase.instance.database;
-
-  return db.delete(
-    'categories',
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-}
 }

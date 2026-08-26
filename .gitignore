@@ -48,3 +48,4 @@ app.*.map.json
 .widget_preview/
 assets/models/model.onnx
 assets/models/e5/model.onnx
+assets/models/multilingual_e5_small/model.onnx

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
-import 'screens/memo_screen.dart';
 
-void main() {
+import 'screens/memo_screen.dart';
+import 'services/classifier_service.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final classifierService = ClassifierService();
+  await classifierService.initialize();
+
   runApp(const MyApp());
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
+
 class ClassifierService {
   final OnnxRuntime _ort = OnnxRuntime();
   OrtSession? _session;
@@ -33,5 +34,93 @@ class ClassifierService {
     // weights / biasを更新
     // ↓
     // SQLiteなどへ保存
+  }
+  Future<String> debugRunModel() async {
+    final session = _session;
+
+    if (session == null) {
+      return 'モデルがinitializeされていません';
+    }
+
+    // ダミー入力
+    // XLM-RoBERTa系で 0=<s>, 2=</s>
+    final inputIds = [
+      [0, 2],
+    ];
+
+    final attentionMask = [
+      [1, 1],
+    ];
+
+    final inputs = <String, OrtValue>{};
+
+    if (session.inputNames.contains('input_ids')) {
+      final value = await OrtValue.fromList(inputIds, [1, 2]);
+
+      inputs['input_ids'] = await value.to(OrtDataType.int64);
+
+      await value.dispose();
+    }
+
+    if (session.inputNames.contains('attention_mask')) {
+      final value = await OrtValue.fromList(attentionMask, [1, 2]);
+
+      inputs['attention_mask'] = await value.to(OrtDataType.int64);
+
+      await value.dispose();
+    }
+
+    if (session.inputNames.contains('token_type_ids')) {
+      final value = await OrtValue.fromList(
+        [
+          [0, 0],
+        ],
+        [1, 2],
+      );
+
+      inputs['token_type_ids'] = await value.to(OrtDataType.int64);
+
+      await value.dispose();
+    }
+
+    try {
+      final outputs = await session.run(inputs);
+
+      final result = StringBuffer();
+
+      result.writeln('推論成功');
+      result.writeln();
+
+      result.writeln('Input names:');
+      result.writeln(session.inputNames);
+
+      result.writeln();
+      result.writeln('Output names:');
+      result.writeln(session.outputNames);
+
+      for (final entry in outputs.entries) {
+        final output = entry.value;
+
+        result.writeln();
+        result.writeln('${entry.key}:');
+        result.writeln('shape = ${output.shape}');
+
+        final values = await output.asFlattenedList();
+
+        result.writeln('先頭10個 = ${values.take(10).toList()}');
+      }
+
+      for (final output in outputs.values) {
+        await output.dispose();
+      }
+
+      return result.toString();
+    } catch (e) {
+      return '推論失敗\n$e';
+    } finally {
+      for (final input in inputs.values) {
+        await input.dispose();
+      }
+    }
   }
 }

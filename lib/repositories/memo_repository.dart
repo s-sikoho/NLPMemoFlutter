@@ -6,14 +6,9 @@ class MemoRepository {
   Future<List<Memo>> getAllMemos() async {
     final db = await _appDatabase.database;
 
-    final maps = await db.query(
-      'memos',
-      orderBy: 'id DESC',
-    );
+    final maps = await db.query('memos', orderBy: 'id DESC');
 
-    return maps
-        .map((map) => Memo.fromMap(map))
-        .toList();
+    return maps.map((map) => Memo.fromMap(map)).toList();
   }
 
   Future<Memo?> getMemoById(int id) async {
@@ -35,16 +30,16 @@ class MemoRepository {
 
   // カテゴリで絞り込み
   Future<List<Memo>> getMemosByCategoryId(int categoryId) async {
-  final db = await AppDatabase.instance.database;
+    final db = await AppDatabase.instance.database;
 
-  final maps = await db.query(
-    'memos',
-    where: 'categoryid = ?',
-    whereArgs: [categoryId],
-  );
+    final maps = await db.query(
+      'memos',
+      where: 'categoryid = ?',
+      whereArgs: [categoryId],
+    );
 
-  return maps.map((map) => Memo.fromMap(map)).toList();
-}
+    return maps.map((map) => Memo.fromMap(map)).toList();
+  }
 
   // 単語で検索
   Future<List<Memo>> searchMemos(String keyword) async {
@@ -53,10 +48,7 @@ class MemoRepository {
     final maps = await db.query(
       'memos',
       where: 'title LIKE ? OR content LIKE ?',
-      whereArgs: [
-        '%$keyword%',
-        '%$keyword%',
-      ],
+      whereArgs: ['%$keyword%', '%$keyword%'],
     );
 
     return maps.map((map) => Memo.fromMap(map)).toList();
@@ -65,10 +57,7 @@ class MemoRepository {
   Future<int> insertMemo(Memo memo) async {
     final db = await _appDatabase.database;
 
-    return await db.insert(
-      'memos',
-      memo.toMap(),
-    );
+    return await db.insert('memos', memo.toMap());
   }
 
   Future<int> updateMemo(Memo memo) async {
@@ -85,10 +74,6 @@ class MemoRepository {
   Future<int> deleteMemo(int id) async {
     final db = await _appDatabase.database;
 
-    return await db.delete(
-      'memos',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('memos', where: 'id = ?', whereArgs: [id]);
   }
 }

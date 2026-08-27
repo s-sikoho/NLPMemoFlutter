@@ -11,9 +11,7 @@ class TrainingMemo {
     required this.categoryid,
   });
 
-  factory TrainingMemo.fromMap(
-    Map<String, Object?> map,
-  ) {
+  factory TrainingMemo.fromMap(Map<String, Object?> map) {
     return TrainingMemo(
       id: map["id"] as int?,
       title: map["title"] as String,

@@ -17,28 +17,8 @@ Future<void> main() async {
   );
 
   await initTokenizer(tokenizerJson: data.buffer.asUint8List());
-
-  final result = await tokenize(text: 'query: 今日は大学に行った');
-
-  print('inputIds: ${result.inputIds}');
-  print('attentionMask: ${result.attentionMask}');
-
   final classifierService = ClassifierService();
-
   await classifierService.initialize();
-
-  await classifierService.testOnnx(
-    inputIds: result.inputIds.map((e) => e.toInt()).toList(),
-    attentionMask: result.attentionMask.map((e) => e.toInt()).toList(),
-  );
-
-  final embedding = await classifierService.embed(
-    inputIds: result.inputIds.map((e) => e.toInt()).toList(),
-    attentionMask: result.attentionMask.map((e) => e.toInt()).toList(),
-  );
-
-  print('embedding length: ${embedding.length}');
-  print('embedding first 10: ${embedding.take(10).toList()}');
 
   runApp(MyApp(classifierService: classifierService));
 }

@@ -14,17 +14,6 @@ class MemoScreen extends StatefulWidget {
 class _MemoScreenState extends State<MemoScreen> {
   String _result = 'まだ実行していません';
 
-  Future<void> _runDebug() async {
-    setState(() {
-      _result = '実行中...';
-    });
-
-    final result = await widget.classifierService.debugRunModel();
-
-    setState(() {
-      _result = result;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +24,6 @@ class _MemoScreenState extends State<MemoScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElevatedButton(
-              onPressed: _runDebug,
-              child: const Text('ONNXモデルを実行'),
-            ),
-
             const SizedBox(height: 16),
 
             const Text('実行結果', style: TextStyle(fontWeight: FontWeight.bold)),

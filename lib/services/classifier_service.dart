@@ -16,6 +16,94 @@ class ClassifierService {
     return _classify(embedding);
   }
 
+  Future<String> testOnnx({
+    required List<int> inputIds,
+    required List<int> attentionMask,
+  }) async {
+    final session = _session;
+
+    if (session == null) {
+      return 'モデルがinitializeされていません';
+    }
+
+    final inputIds2d = [inputIds];
+    final attentionMask2d = [attentionMask];
+
+    print('ONNX inputIds: $inputIds2d');
+    print('ONNX attentionMask: $attentionMask2d');
+
+    final inputs = <String, OrtValue>{};
+
+    if (session.inputNames.contains('input_ids')) {
+      final value = await OrtValue.fromList(inputIds2d, [1, inputIds.length]);
+
+      inputs['input_ids'] = await value.to(OrtDataType.int64);
+
+      await value.dispose();
+    }
+
+    if (session.inputNames.contains('attention_mask')) {
+      final value = await OrtValue.fromList(attentionMask2d, [
+        1,
+        attentionMask.length,
+      ]);
+
+      inputs['attention_mask'] = await value.to(OrtDataType.int64);
+
+      await value.dispose();
+    }
+
+    if (session.inputNames.contains('token_type_ids')) {
+      final tokenTypeIds = [List<int>.filled(inputIds.length, 0)];
+
+      final value = await OrtValue.fromList(tokenTypeIds, [1, inputIds.length]);
+
+      inputs['token_type_ids'] = await value.to(OrtDataType.int64);
+
+      await value.dispose();
+    }
+
+    try {
+      final outputs = await session.run(inputs);
+
+      final result = StringBuffer();
+
+      result.writeln('推論成功');
+      result.writeln();
+
+      result.writeln('Input names:');
+      result.writeln(session.inputNames);
+
+      result.writeln();
+      result.writeln('Output names:');
+      result.writeln(session.outputNames);
+
+      for (final entry in outputs.entries) {
+        final output = entry.value;
+
+        result.writeln();
+        result.writeln('${entry.key}:');
+        result.writeln('shape = ${output.shape}');
+
+        final values = await output.asFlattenedList();
+
+        result.writeln('先頭10個 = ${values.take(10).toList()}');
+      }
+
+      for (final output in outputs.values) {
+        await output.dispose();
+      }
+
+      return result.toString();
+    } catch (e) {
+      return '推論失敗\n$e';
+    } finally {
+      for (final input in inputs.values) {
+        await input.dispose();
+      }
+    }
+  }
+
   Future<List<double>> _embed(String text) async {
     return List<double>.filled(384, 0.0);
   }

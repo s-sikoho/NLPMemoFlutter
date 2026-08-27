@@ -1,64 +1,47 @@
-// The original content is temporarily commented out to allow generating a self-contained demo - feel free to uncomment later.
-
-// import 'package:flutter/material.dart';
-// import 'screens/memo_screen.dart';
-// import 'services/classifier_service.dart';
-//
-// Future<void> main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//
-//   final classifierService = ClassifierService();
-//
-//   await classifierService.initialize();
-//
-//   runApp(
-//     MyApp(
-//       classifierService: classifierService,
-//     ),
-//   );
-// }
-//
-// class MyApp extends StatelessWidget {
-//   final ClassifierService classifierService;
-//
-//   const MyApp({
-//     super.key,
-//     required this.classifierService,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: MemoScreen(
-//         classifierService: classifierService,
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
-import 'package:nlpmemoflutter/src/rust/api/simple.dart';
+import 'package:flutter/services.dart';
+
+import 'screens/memo_screen.dart';
+import 'services/classifier_service.dart';
+
 import 'package:nlpmemoflutter/src/rust/frb_generated.dart';
+import 'package:nlpmemoflutter/src/rust/api/tokenizer.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await RustLib.init();
-  runApp(const MyApp());
+
+  final data = await rootBundle.load(
+    'assets/models/multilingual_e5_small/tokenizer.json',
+  );
+
+  await initTokenizer(tokenizerJson: data.buffer.asUint8List());
+
+  final result = await tokenize(text: 'query: 今日は大学に行った');
+
+  print('inputIds: ${result.inputIds}');
+  print('attentionMask: ${result.attentionMask}');
+
+  final classifierService = ClassifierService();
+
+  await classifierService.initialize();
+
+  await classifierService.testOnnx(
+    inputIds: result.inputIds.map((e) => e.toInt()).toList(),
+    attentionMask: result.attentionMask.map((e) => e.toInt()).toList(),
+  );
+
+  runApp(MyApp(classifierService: classifierService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ClassifierService classifierService;
+
+  const MyApp({super.key, required this.classifierService});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
-        body: Center(
-          child: Text(
-            'Action: Call Rust `greet("Tom")`\nResult: `${greet(name: "Tom")}`',
-          ),
-        ),
-      ),
-    );
+    return MaterialApp(home: MemoScreen(classifierService: classifierService));
   }
 }

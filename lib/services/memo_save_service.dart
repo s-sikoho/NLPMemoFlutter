@@ -1,7 +1,7 @@
 import '../repositories/memo_repository.dart';
 import '../models/memo.dart';
 import '../repositories/category_repository.dart';
-class MemoService {
+class MemoSaveService {
   final MemoRepository _memoRepository = MemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
 

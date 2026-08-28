@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 
 import 'screens/memo_screen.dart';
-import 'services/classifier_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final classifierService = ClassifierService();
-  await classifierService.initialize();
-
-  runApp(
-    MyApp(
-      classifierService: classifierService,
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final ClassifierService classifierService;
-
-  const MyApp({super.key, required this.classifierService});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: MemoScreen(classifierService: classifierService));
+    return MaterialApp(
+      title: 'Memo App',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+        ),
+        useMaterial3: true,
+      ),
+      home: const MemoScreen(),
+    );
   }
 }

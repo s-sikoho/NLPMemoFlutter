@@ -16,7 +16,7 @@ class CategoryRepository {
     final db = await _appDatabase.database;
 
     final maps = await db.query(
-      'categoryis',
+      'categories',
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
@@ -25,6 +25,23 @@ class CategoryRepository {
     if (maps.isEmpty) {
       return null;
     }
+    return Category.fromMap(maps.first);
+  }
+
+  Future<Category> getOtherCategory() async {
+    final db = await _appDatabase.database;
+
+    final maps = await db.query(
+      'categories',
+      where: 'isOther = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+
+    if (maps.isEmpty) {
+      throw StateError('その他カテゴリが存在しません');
+    }
+
     return Category.fromMap(maps.first);
   }
 

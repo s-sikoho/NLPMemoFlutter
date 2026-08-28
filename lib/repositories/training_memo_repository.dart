@@ -1,18 +1,17 @@
 import '../database/app_database.dart';
-import '../models/memo.dart';
+import '../models/training_memo.dart';
 
-class MemoRepository {
+class TrainingMemoRepository {
   final AppDatabase _appDatabase = AppDatabase.instance;
-
-  Future<List<Memo>> getAllMemos() async {
+  Future<List<TrainingMemo>> getAllMemos() async {
     final db = await _appDatabase.database;
 
     final maps = await db.query('memos', orderBy: 'id DESC');
 
-    return maps.map((map) => Memo.fromMap(map)).toList();
+    return maps.map((map) => TrainingMemo.fromMap(map)).toList();
   }
 
-  Future<Memo?> getMemoById(int id) async {
+  Future<TrainingMemo?> getMemoById(int id) async {
     final db = await _appDatabase.database;
 
     final maps = await db.query(
@@ -26,11 +25,11 @@ class MemoRepository {
       return null;
     }
 
-    return Memo.fromMap(maps.first);
+    return TrainingMemo.fromMap(maps.first);
   }
 
   // カテゴリで絞り込み
-  Future<List<Memo>> getMemosByCategoryId(int categoryId) async {
+  Future<List<TrainingMemo>> getMemosByCategoryId(int categoryId) async {
     final db = await AppDatabase.instance.database;
 
     final maps = await db.query(
@@ -39,11 +38,11 @@ class MemoRepository {
       whereArgs: [categoryId],
     );
 
-    return maps.map((map) => Memo.fromMap(map)).toList();
+    return maps.map((map) => TrainingMemo.fromMap(map)).toList();
   }
 
   // 単語で検索
-  Future<List<Memo>> searchMemos(String keyword) async {
+  Future<List<TrainingMemo>> searchMemos(String keyword) async {
     final db = await AppDatabase.instance.database;
 
     final maps = await db.query(
@@ -52,16 +51,16 @@ class MemoRepository {
       whereArgs: ['%$keyword%', '%$keyword%'],
     );
 
-    return maps.map((map) => Memo.fromMap(map)).toList();
+    return maps.map((map) => TrainingMemo.fromMap(map)).toList();
   }
 
-  Future<int> insertMemo(Memo memo) async {
+  Future<int> insertMemo(TrainingMemo memo) async {
     final db = await _appDatabase.database;
 
     return await db.insert('memos', memo.toMap());
   }
 
-  Future<int> updateMemo(Memo memo) async {
+  Future<int> updateMemo(TrainingMemo memo) async {
     final db = await _appDatabase.database;
 
     return await db.update(
@@ -78,17 +77,13 @@ class MemoRepository {
     return await db.delete('memos', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<void> moveToCategory({
-    required int fromCategoryId,
-    required int toCategoryId,
-  }) async {
+  Future<void> deleteByCategoryId(int categoryId) async {
     final db = await _appDatabase.database;
 
-    await db.update(
-      'memos',
-      {'category_id': toCategoryId},
+    await db.delete(
+      'training_memos',
       where: 'category_id = ?',
-      whereArgs: [fromCategoryId],
+      whereArgs: [categoryId],
     );
   }
 }

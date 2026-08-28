@@ -35,6 +35,16 @@ class AppDatabase {
     ''');
 
     await db.execute('''
+      CREATE TABLE category_embeddings(
+        category_id INTEGER PRIMARY KEY,
+        embedding BLOB NOT NULL,
+        FOREIGN KEY (category_id)
+          REFERENCES categories(id)
+          ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE memos(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -52,6 +62,6 @@ class AppDatabase {
       )
     ''');
 
-    await db.insert("categories", {"id": 0, "name": "その他", "isOther": true});
+    await db.insert("categories", {"id": 0, "name": "その他", "isOther": 1});
   }
 }

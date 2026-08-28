@@ -9,11 +9,11 @@ class Category {
     return Category(
       id: map["id"] as int?,
       name: map["name"] as String,
-      isOther: (map['isOther'] as int) == 1,
+      isOther: (map['is_other'] as int) == 1,
     );
   }
 
   Map<String, Object?> toMap() {
-    return {"id": id, "name": name, 'isOther': isOther ? 1 : 0,};
+    return {"id": id, "name": name, 'is_other': isOther ? 1 : 0,};
   }
 }

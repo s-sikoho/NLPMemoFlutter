@@ -33,7 +33,7 @@ class CategoryRepository {
 
     final maps = await db.query(
       'categories',
-      where: 'isOther = ?',
+      where: 'is_other = ?',
       whereArgs: [1],
       limit: 1,
     );

@@ -7,7 +7,7 @@ class MemoService {
 
   Future<int> insertMemo(Memo memo) async {
     final category =
-        await _categoryRepository.getCategoryById(memo.categoryid);
+        await _categoryRepository.getCategoryById(memo.categoryId);
 
     if (category == null) {
       throw StateError('存在しないカテゴリです');
@@ -18,7 +18,7 @@ class MemoService {
 
   Future<void> updateMemo(Memo memo) async {
     final category =
-        await _categoryRepository.getCategoryById(memo.categoryid);
+        await _categoryRepository.getCategoryById(memo.categoryId);
 
     if (category == null) {
       throw StateError('存在しないカテゴリです');

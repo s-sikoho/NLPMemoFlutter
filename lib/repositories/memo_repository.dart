@@ -35,7 +35,7 @@ class MemoRepository {
 
     final maps = await db.query(
       'memos',
-      where: 'categoryid = ?',
+      where: 'category_id = ?',
       whereArgs: [categoryId],
     );
 

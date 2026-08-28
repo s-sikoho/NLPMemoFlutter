@@ -30,7 +30,7 @@ class AppDatabase {
       CREATE TABLE categories(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        isOther INTEGER NOT NULL
+        is_other INTEGER NOT NULL
       )
     ''');
 
@@ -49,7 +49,7 @@ class AppDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
-        categoryid INTEGER NOT NULL
+        category_id INTEGER NOT NULL
       )
     ''');
 
@@ -58,10 +58,10 @@ class AppDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
-        categoryid INTEGER NOT NULL
+        category_id INTEGER NOT NULL
       )
     ''');
 
-    await db.insert("categories", {"id": 0, "name": "その他", "isOther": 1});
+    await db.insert("categories", {"id": 0, "name": "その他", "is_other": 1});
   }
 }

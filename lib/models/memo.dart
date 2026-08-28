@@ -2,13 +2,13 @@ class Memo {
   final int? id;
   final String title;
   final String content;
-  final int categoryid;
+  final int categoryId;
 
   const Memo({
     this.id,
     required this.title,
     required this.content,
-    required this.categoryid,
+    required this.categoryId,
   });
 
   factory Memo.fromMap(Map<String, Object?> map) {
@@ -16,7 +16,7 @@ class Memo {
       id: map["id"] as int?,
       title: map["title"] as String,
       content: map["content"] as String,
-      categoryid: map["categoryid"] as int,
+      categoryId: map["category_id"] as int,
     );
   }
 
@@ -25,7 +25,7 @@ class Memo {
       "id": id,
       "title": title,
       "content": content,
-      "categoryid": categoryid,
+      "category_id": categoryId,
     };
   }
 }

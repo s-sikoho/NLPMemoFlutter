@@ -6,12 +6,12 @@ import '../repositories/category_repository.dart';
 import '../services/memo_save_service.dart';
 import '../widgets/category_selector.dart';
 import '../services/category_delete_service.dart';
+import '../services/classifier_service.dart';
 
 class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
-
-  const MemoEditScreen({super.key, this.memo});
-
+  final ClassifierService classifierService;
+  const MemoEditScreen({super.key, this.memo, required this.classifierService});
   @override
   State<MemoEditScreen> createState() => _MemoEditScreenState();
 }
@@ -27,6 +27,7 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   int? _selectedCategoryId;
   bool _isLoading = true;
   bool get _isEditMode => widget.memo != null;
+  bool _isPredicting = false;
 
   @override
   void initState() {
@@ -114,21 +115,15 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         );
       },
     );
-
     if (name == null) {
       return;
     }
-
     final category = Category(name: name, isOther: false);
-
     final newId = await _categoryRepository.insertCategory(category);
-
     await _loadCategories();
-
     if (!mounted) {
       return;
     }
-
     setState(() {
       _selectedCategoryId = newId;
     });
@@ -136,22 +131,17 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
 
   Future<void> _deleteSelectedCategory() async {
     final categoryId = _selectedCategoryId;
-
     if (categoryId == null) {
       return;
     }
-
     final selectedCategory = _categories.firstWhere(
       (category) => category.id == categoryId,
     );
-
     if (selectedCategory.isOther) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('「その他」カテゴリは削除できません')));
-
       return;
     }
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -178,31 +168,67 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         );
       },
     );
-
     if (confirmed != true) {
       return;
     }
-
     await _categoryDeleteService.deleteCategory(categoryId);
-
     final otherCategory = await _categoryRepository.getOtherCategory();
-
     await _loadCategories();
-
     if (!mounted) {
       return;
     }
-
     setState(() {
       _selectedCategoryId = otherCategory.id;
     });
+  }
+
+  Future<void> _predictCategory() async {
+    if (_isPredicting) {
+      return;
+    }
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+    final text = '$title $content'.trim();
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('タイトルまたは本文を入力してください')));
+      return;
+    }
+    setState(() {
+      _isPredicting = true;
+    });
+    try {
+      final categoryId = await widget.classifierService.predictCategory(text);
+      // 返されたカテゴリが現在のカテゴリ一覧に存在するか確認
+      final exists = _categories.any((category) => category.id == categoryId);
+      if (!exists) {
+        throw StateError('予測されたカテゴリが存在しません: $categoryId');
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _selectedCategoryId = categoryId;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('カテゴリ予測に失敗しました: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPredicting = false;
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
-
     super.dispose();
   }
 
@@ -247,6 +273,21 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                     },
                     onAdd: _addCategory,
                     onDelete: _deleteSelectedCategory,
+                  ),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: _isPredicting ? null : _predictCategory,
+                      icon: _isPredicting
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.auto_awesome),
+                      label: Text(_isPredicting ? '予測中' : 'カテゴリを自動予測'),
+                    ),
                   ),
 
                   const SizedBox(height: 16),

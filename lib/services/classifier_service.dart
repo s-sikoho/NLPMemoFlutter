@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../repositories/category_embedding_repository.dart';
 import '../repositories/memo_repository.dart';
-import '../repositories/traning_memo_repository.dart';
+import '../repositories/training_memo_repository.dart';
 import '../models/category_embedding.dart';
 
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
@@ -17,7 +17,7 @@ class ClassifierService {
   OrtSession? _session;
   final CategoryEmbeddingRepository _categoryEmbeddingRepository =
       CategoryEmbeddingRepository();
-  final TraningMemoRepository _trainingMemoRepository = TraningMemoRepository();
+  final TrainingMemoRepository _trainingMemoRepository = TrainingMemoRepository();
   final MemoRepository _memoRepository = MemoRepository();
 
   Future<void> initialize() async {

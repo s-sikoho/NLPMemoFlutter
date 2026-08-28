@@ -3,7 +3,7 @@ import '../models/memo.dart';
 
 class MemoRepository {
   final AppDatabase _appDatabase = AppDatabase.instance;
-  
+
   Future<List<Memo>> getAllMemos() async {
     final db = await _appDatabase.database;
 
@@ -76,5 +76,19 @@ class MemoRepository {
     final db = await _appDatabase.database;
 
     return await db.delete('memos', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> moveToCategory({
+    required int fromCategoryId,
+    required int toCategoryId,
+  }) async {
+    final db = await _appDatabase.database;
+
+    await db.update(
+      'memos',
+      {'category_id': toCategoryId},
+      where: 'category_id = ?',
+      whereArgs: [fromCategoryId],
+    );
   }
 }

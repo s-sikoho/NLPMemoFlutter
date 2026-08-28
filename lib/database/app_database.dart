@@ -62,6 +62,6 @@ class AppDatabase {
       )
     ''');
 
-    await db.insert("categories", {"id": 0, "name": "その他", "isOther": true});
+    await db.insert("categories", {"id": 0, "name": "その他", "isOther": 1});
   }
 }

@@ -1,7 +1,7 @@
 import '../database/app_database.dart';
 import '../models/training_memo.dart';
 
-class TraningMemoRepository {
+class TrainingMemoRepository {
   final AppDatabase _appDatabase = AppDatabase.instance;
   Future<List<TrainingMemo>> getAllMemos() async {
     final db = await _appDatabase.database;
@@ -75,5 +75,15 @@ class TraningMemoRepository {
     final db = await _appDatabase.database;
 
     return await db.delete('memos', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteByCategoryId(int categoryId) async {
+    final db = await _appDatabase.database;
+
+    await db.delete(
+      'training_memos',
+      where: 'category_id = ?',
+      whereArgs: [categoryId],
+    );
   }
 }

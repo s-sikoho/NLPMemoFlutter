@@ -4,20 +4,15 @@ class CategoryEmbedding {
   final int categoryId;
   final List<double> embedding;
 
-  const CategoryEmbedding({
-    required this.categoryId,
-    required this.embedding,
-  });
+  const CategoryEmbedding({required this.categoryId, required this.embedding});
 
-  factory CategoryEmbedding.fromMap(
-    Map<String, Object?> map,
-  ) {
+  factory CategoryEmbedding.fromMap(Map<String, Object?> map) {
     final bytes = map['embedding'] as Uint8List;
 
-    final floatList = bytes.buffer.asFloat32List(
-      bytes.offsetInBytes,
-      bytes.lengthInBytes ~/ 4,
-    );
+    // offsetが0になるように新しい領域へコピー
+    final copiedBytes = Uint8List.fromList(bytes);
+
+    final floatList = copiedBytes.buffer.asFloat32List();
 
     return CategoryEmbedding(
       categoryId: map['category_id'] as int,

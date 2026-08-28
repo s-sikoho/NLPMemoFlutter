@@ -9,11 +9,7 @@ Future<void> main() async {
   final classifierService = ClassifierService();
   await classifierService.initialize();
 
-  runApp(
-    MyApp(
-      classifierService: classifierService,
-    ),
-  );
+  runApp(MyApp(classifierService: classifierService));
 }
 
 class MyApp extends StatelessWidget {
@@ -23,6 +19,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: MemoScreen(classifierService: classifierService));
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MemoScreen(classifierService: classifierService),
+    );
   }
 }

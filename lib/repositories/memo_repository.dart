@@ -29,6 +29,36 @@ class MemoRepository {
     return Memo.fromMap(maps.first);
   }
 
+  Future<List<Memo>> getFilteredMemos({
+    int? categoryId,
+    String? keyword,
+  }) async {
+    final db = await AppDatabase.instance.database;
+
+    final whereParts = <String>[];
+    final whereArgs = <Object?>[];
+
+    if (categoryId != null) {
+      whereParts.add('category_id = ?');
+      whereArgs.add(categoryId);
+    }
+
+    if (keyword != null && keyword.trim().isNotEmpty) {
+      whereParts.add('(title LIKE ? OR content LIKE ?)');
+      whereArgs.add('%${keyword.trim()}%');
+      whereArgs.add('%${keyword.trim()}%');
+    }
+
+    final maps = await db.query(
+      'memos',
+      where: whereParts.isEmpty ? null : whereParts.join(' AND '),
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
+      orderBy: 'id DESC',
+    );
+
+    return maps.map((map) => Memo.fromMap(map)).toList();
+  }
+
   // カテゴリで絞り込み
   Future<List<Memo>> getMemosByCategoryId(int categoryId) async {
     final db = await AppDatabase.instance.database;

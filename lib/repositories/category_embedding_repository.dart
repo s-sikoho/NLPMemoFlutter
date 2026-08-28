@@ -3,12 +3,10 @@ import '../models/category_embedding.dart';
 import 'package:sqflite/sqflite.dart';
 
 class CategoryEmbeddingRepository {
-  final AppDatabase _database;
-
-  CategoryEmbeddingRepository(this._database);
+  final AppDatabase _appDatabase = AppDatabase.instance;
 
   Future<List<CategoryEmbedding>> getAll() async {
-    final db = await _database.database;
+    final db = await _appDatabase.database;
 
     final rows = await db.query(
       'category_embeddings',
@@ -22,7 +20,7 @@ class CategoryEmbeddingRepository {
   Future<CategoryEmbedding?> getByCategoryId(
     int categoryId,
   ) async {
-    final db = await _database.database;
+    final db = await _appDatabase.database;
 
     final rows = await db.query(
       'category_embeddings',
@@ -41,7 +39,7 @@ class CategoryEmbeddingRepository {
   Future<void> save(
     CategoryEmbedding categoryEmbedding,
   ) async {
-    final db = await _database.database;
+    final db = await _appDatabase.database;
 
     await db.insert(
       'category_embeddings',
@@ -53,7 +51,7 @@ class CategoryEmbeddingRepository {
   Future<void> deleteByCategoryId(
     int categoryId,
   ) async {
-    final db = await _database.database;
+    final db = await _appDatabase.database;
 
     await db.delete(
       'category_embeddings',
@@ -63,7 +61,7 @@ class CategoryEmbeddingRepository {
   }
 
   Future<void> deleteAll() async {
-    final db = await _database.database;
+    final db = await _appDatabase.database;
 
     await db.delete(
       'category_embeddings',

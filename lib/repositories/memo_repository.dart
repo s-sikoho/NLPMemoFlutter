@@ -3,6 +3,7 @@ import '../models/memo.dart';
 
 class MemoRepository {
   final AppDatabase _appDatabase = AppDatabase.instance;
+  
   Future<List<Memo>> getAllMemos() async {
     final db = await _appDatabase.database;
 

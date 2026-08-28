@@ -11,6 +11,7 @@ import '../services/classifier_service.dart';
 
 import '../widgets/category_selector.dart';
 import '../widgets/category_list_sheet.dart';
+import '../widgets/category_edit_dialog.dart';
 
 class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
@@ -198,89 +199,19 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   }
 
   Future<void> _editCategory(Category category) async {
-    String categoryName = category.name;
-    Color selectedColor = Color(category.color);
-    final result = await showDialog<Category>(
+    final updatedCategory = await showDialog<Category>(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('カテゴリを編集'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    initialValue: category.name,
-                    decoration: const InputDecoration(labelText: 'カテゴリ名'),
-                    onChanged: (value) {
-                      categoryName = value;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _categoryColors.map((color) {
-                      final isSelected =
-                          color.toARGB32() == selectedColor.toARGB32();
-                      return GestureDetector(
-                        onTap: () {
-                          setDialogState(() {
-                            selectedColor = color;
-                          });
-                        },
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: isSelected
-                                ? Border.all(width: 3, color: Colors.black)
-                                : null,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('キャンセル'),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final name = categoryName.trim();
-                    if (name.isEmpty) {
-                      return;
-                    }
-                    Navigator.pop(
-                      context,
-                      Category(
-                        id: category.id,
-                        name: name,
-                        isOther: category.isOther,
-                        color: selectedColor.toARGB32(),
-                      ),
-                    );
-                  },
-                  child: const Text('保存'),
-                ),
-              ],
-            );
-          },
-        );
+        return CategoryEditDialog(category: category, colors: _categoryColors);
       },
     );
-    if (result == null) {
+
+    if (updatedCategory == null) {
       return;
     }
-    await _categoryRepository.updateCategory(result);
+
+    await _categoryRepository.updateCategory(updatedCategory);
+
     await _loadCategories();
   }
 

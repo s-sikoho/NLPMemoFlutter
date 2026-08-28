@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 
 import '../repositories/category_embedding_repository.dart';
 import '../repositories/memo_repository.dart';

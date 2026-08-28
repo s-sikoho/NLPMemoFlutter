@@ -21,11 +21,8 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   final TextEditingController _contentController = TextEditingController();
 
   List<Category> _categories = [];
-
   int? _selectedCategoryId;
-
   bool _isLoading = true;
-
   bool get _isEditMode => widget.memo != null;
 
   @override

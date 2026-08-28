@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../models/category.dart';
 import '../models/memo.dart';
+
 import '../repositories/category_repository.dart';
+
 import '../services/memo_save_service.dart';
-import '../widgets/category_selector.dart';
 import '../services/category_delete_service.dart';
 import '../services/classifier_service.dart';
+
+import '../widgets/category_selector.dart';
+import '../widgets/category_list_sheet.dart';
 
 class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
@@ -373,71 +377,23 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   }
 
   Future<void> _showCategorySelector() async {
-    await showModalBottomSheet(
+    final selectedId = await showModalBottomSheet<int>(
       context: context,
       builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const ListTile(
-                title: Text(
-                  'カテゴリを選択',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              ..._categories.map((category) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 8,
-                    backgroundColor: Color(category.color),
-                  ),
-                  title: Text(category.name),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategoryId = category.id;
-                    });
-                    Navigator.pop(context);
-                  },
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined),
-                        onPressed: () async {
-                          Navigator.pop(context);
-
-                          await _editCategory(category);
-                        },
-                      ),
-
-                      if (!category.isOther)
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () async {
-                            Navigator.pop(context);
-
-                            await _deleteCategory(category);
-                          },
-                        ),
-                    ],
-                  ),
-                );
-              }),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.add),
-                title: const Text('カテゴリを追加'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await _addCategory();
-                },
-              ),
-            ],
-          ),
+        return CategoryListSheet(
+          categories: _categories,
+          onEdit: _editCategory,
+          onDelete: _deleteCategory,
+          onAdd: _addCategory,
         );
       },
     );
+    if (selectedId == null) {
+      return;
+    }
+    setState(() {
+      _selectedCategoryId = selectedId;
+    });
   }
 
   @override

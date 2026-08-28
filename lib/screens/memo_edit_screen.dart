@@ -12,6 +12,8 @@ import '../services/classifier_service.dart';
 import '../widgets/category_selector.dart';
 import '../widgets/category_list_sheet.dart';
 import '../widgets/category_edit_dialog.dart';
+import '../widgets/category_add_dialog.dart';
+import '../widgets/category_delete_confirm_dialog.dart';
 
 class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
@@ -94,89 +96,16 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   }
 
   Future<void> _addCategory() async {
-    String categoryName = '';
-    Color selectedColor = Colors.blue;
-
-    final result = await showDialog<Category>(
+    final category = await showDialog<Category>(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('カテゴリを追加'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    autofocus: true,
-                    decoration: const InputDecoration(hintText: 'カテゴリ名'),
-                    onChanged: (value) {
-                      categoryName = value;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _categoryColors.map((color) {
-                      final isSelected =
-                          color.toARGB32() == selectedColor.toARGB32();
-
-                      return GestureDetector(
-                        onTap: () {
-                          setDialogState(() {
-                            selectedColor = color;
-                          });
-                        },
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: isSelected
-                                ? Border.all(width: 3, color: Colors.black)
-                                : null,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('キャンセル'),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final name = categoryName.trim();
-                    if (name.isEmpty) {
-                      return;
-                    }
-                    Navigator.of(context).pop(
-                      Category(
-                        name: name,
-                        isOther: false,
-                        color: selectedColor.toARGB32(),
-                      ),
-                    );
-                  },
-                  child: const Text('追加'),
-                ),
-              ],
-            );
-          },
-        );
+      builder: (_) {
+        return CategoryAddDialog(colors: _categoryColors);
       },
     );
-    if (result == null) {
+    if (category == null) {
       return;
     }
-    final newId = await _categoryRepository.insertCategory(result);
+    final newId = await _categoryRepository.insertCategory(category);
     await _loadCategories();
     if (!mounted) {
       return;
@@ -205,13 +134,10 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         return CategoryEditDialog(category: category, colors: _categoryColors);
       },
     );
-
     if (updatedCategory == null) {
       return;
     }
-
     await _categoryRepository.updateCategory(updatedCategory);
-
     await _loadCategories();
   }
 
@@ -221,28 +147,8 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     }
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('カテゴリを削除しますか？'),
-          content: Text(
-            '「${category.name}」を削除します。\n'
-            'このカテゴリのメモは「その他」に移動します。',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: const Text('キャンセル'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: const Text('削除'),
-            ),
-          ],
-        );
+      builder: (_) {
+        return CategoryDeleteConfirmDialog(category: category);
       },
     );
     if (confirmed != true) {
@@ -250,14 +156,12 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     }
     await _categoryDeleteService.deleteCategory(category.id!);
     await _loadCategories();
-    // 削除したカテゴリが現在選択中なら「その他」に変更
+    // 今編集中のメモが、削除したカテゴリを選択していた場合
     if (_selectedCategoryId == category.id) {
       final other = await _categoryRepository.getOtherCategory();
-
       if (!mounted) {
         return;
       }
-
       setState(() {
         _selectedCategoryId = other.id;
       });

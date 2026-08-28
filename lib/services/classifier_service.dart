@@ -85,13 +85,13 @@ class ClassifierService {
 
     for (final memo in trainingMemos) {
       textsByCategory
-          .putIfAbsent(memo.categoryid, () => [])
+          .putIfAbsent(memo.categoryId, () => [])
           .add('${memo.title} ${memo.content}');
     }
 
     for (final memo in confirmedMemos) {
       textsByCategory
-          .putIfAbsent(memo.categoryid, () => [])
+          .putIfAbsent(memo.categoryId, () => [])
           .add('${memo.title} ${memo.content}');
     }
 

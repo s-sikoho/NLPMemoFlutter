@@ -33,8 +33,8 @@ class TrainingMemoRepository {
     final db = await AppDatabase.instance.database;
 
     final maps = await db.query(
-      'memos',
-      where: 'categoryid = ?',
+      'training_memos',
+      where: 'category_id = ?',
       whereArgs: [categoryId],
     );
 
@@ -46,7 +46,7 @@ class TrainingMemoRepository {
     final db = await AppDatabase.instance.database;
 
     final maps = await db.query(
-      'memos',
+      'training_memos',
       where: 'title LIKE ? OR content LIKE ?',
       whereArgs: ['%$keyword%', '%$keyword%'],
     );

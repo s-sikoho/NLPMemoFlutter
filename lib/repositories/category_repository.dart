@@ -14,18 +14,26 @@ class CategoryRepository {
 
   Future<Category?> getCategoryById(int id) async {
     final db = await _appDatabase.database;
-
     final maps = await db.query(
       'categories',
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
     );
-
     if (maps.isEmpty) {
       return null;
     }
     return Category.fromMap(maps.first);
+  }
+  Future<int> updateCategory(Category category) async {
+    final db = await _appDatabase.database;
+
+    return await db.update(
+      'categories',
+      category.toMap(),
+      where: 'id = ?',
+      whereArgs: [category.id],
+    );
   }
 
   Future<Category> getOtherCategory() async {

@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../models/category.dart';
 import '../models/memo.dart';
+
 import '../repositories/category_repository.dart';
+
 import '../services/memo_save_service.dart';
-import '../widgets/category_selector.dart';
 import '../services/category_delete_service.dart';
 import '../services/classifier_service.dart';
+
+import '../widgets/category_selector.dart';
+import '../widgets/category_list_sheet.dart';
+import '../widgets/category_edit_dialog.dart';
+import '../widgets/category_add_dialog.dart';
+import '../widgets/category_delete_confirm_dialog.dart';
 
 class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
@@ -22,6 +29,17 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final CategoryDeleteService _categoryDeleteService = CategoryDeleteService();
+
+  final _categoryColors = <Color>[
+    Colors.blue,
+    Colors.red,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.pink,
+    Colors.brown,
+  ];
 
   List<Category> _categories = [];
   int? _selectedCategoryId;
@@ -78,47 +96,15 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   }
 
   Future<void> _addCategory() async {
-    String categoryName = '';
-
-    final name = await showDialog<String>(
+    final category = await showDialog<Category>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('カテゴリを追加'),
-          content: TextField(
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'カテゴリ名'),
-            onChanged: (value) {
-              categoryName = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('キャンセル'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final trimmedName = categoryName.trim();
-
-                if (trimmedName.isEmpty) {
-                  return;
-                }
-
-                Navigator.of(context).pop(trimmedName);
-              },
-              child: const Text('追加'),
-            ),
-          ],
-        );
+      builder: (_) {
+        return CategoryAddDialog(colors: _categoryColors);
       },
     );
-    if (name == null) {
+    if (category == null) {
       return;
     }
-    final category = Category(name: name, isOther: false);
     final newId = await _categoryRepository.insertCategory(category);
     await _loadCategories();
     if (!mounted) {
@@ -129,57 +115,57 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     });
   }
 
-  Future<void> _deleteSelectedCategory() async {
-    final categoryId = _selectedCategoryId;
-    if (categoryId == null) {
+  Category? _getSelectedCategory() {
+    if (_selectedCategoryId == null) {
+      return null;
+    }
+    for (final category in _categories) {
+      if (category.id == _selectedCategoryId) {
+        return category;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _editCategory(Category category) async {
+    final updatedCategory = await showDialog<Category>(
+      context: context,
+      builder: (context) {
+        return CategoryEditDialog(category: category, colors: _categoryColors);
+      },
+    );
+    if (updatedCategory == null) {
       return;
     }
-    final selectedCategory = _categories.firstWhere(
-      (category) => category.id == categoryId,
-    );
-    if (selectedCategory.isOther) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('「その他」カテゴリは削除できません')));
+    await _categoryRepository.updateCategory(updatedCategory);
+    await _loadCategories();
+  }
+
+  Future<void> _deleteCategory(Category category) async {
+    if (category.isOther) {
       return;
     }
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('カテゴリを削除しますか？'),
-          content: Text(
-            '「${selectedCategory.name}」を削除します。\n'
-            'このカテゴリに属するメモは「その他」に移動します。',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('キャンセル'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('削除'),
-            ),
-          ],
-        );
+      builder: (_) {
+        return CategoryDeleteConfirmDialog(category: category);
       },
     );
     if (confirmed != true) {
       return;
     }
-    await _categoryDeleteService.deleteCategory(categoryId);
-    final otherCategory = await _categoryRepository.getOtherCategory();
+    await _categoryDeleteService.deleteCategory(category.id!);
     await _loadCategories();
-    if (!mounted) {
-      return;
+    // 今編集中のメモが、削除したカテゴリを選択していた場合
+    if (_selectedCategoryId == category.id) {
+      final other = await _categoryRepository.getOtherCategory();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _selectedCategoryId = other.id;
+      });
     }
-    setState(() {
-      _selectedCategoryId = otherCategory.id;
-    });
   }
 
   Future<void> _predictCategory() async {
@@ -225,6 +211,26 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     }
   }
 
+  Future<void> _showCategorySelector() async {
+    final selectedId = await showModalBottomSheet<int>(
+      context: context,
+      builder: (context) {
+        return CategoryListSheet(
+          categories: _categories,
+          onEdit: _editCategory,
+          onDelete: _deleteCategory,
+          onAdd: _addCategory,
+        );
+      },
+    );
+    if (selectedId == null) {
+      return;
+    }
+    setState(() {
+      _selectedCategoryId = selectedId;
+    });
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -264,15 +270,10 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                   ),
 
                   CategorySelector(
-                    categories: _categories,
-                    selectedCategoryId: _selectedCategoryId,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategoryId = value;
-                      });
+                    selectedCategory: _getSelectedCategory(),
+                    onTap: () {
+                      _showCategorySelector();
                     },
-                    onAdd: _addCategory,
-                    onDelete: _deleteSelectedCategory,
                   ),
 
                   Align(

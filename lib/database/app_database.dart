@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-
+import 'package:flutter/material.dart';
 class AppDatabase {
   static final AppDatabase instance = AppDatabase._init();
 
@@ -30,7 +30,8 @@ class AppDatabase {
       CREATE TABLE categories(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        is_other INTEGER NOT NULL
+        is_other INTEGER NOT NULL,
+        color INTEGER NOT NULL
       )
     ''');
 
@@ -62,6 +63,6 @@ class AppDatabase {
       )
     ''');
 
-    await db.insert("categories", {"id": 0, "name": "その他", "is_other": 1});
+    await db.insert("categories", {"id": 0, "name": "その他", "is_other": 1, "color" : Colors.white.toARGB32(),});
   }
 }

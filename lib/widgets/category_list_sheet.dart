@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+
 import '../models/category.dart';
 
 class CategoryListSheet extends StatelessWidget {
   final List<Category> categories;
+
   final Future<void> Function(Category category) onEdit;
   final Future<void> Function(Category category) onDelete;
   final Future<void> Function() onAdd;
+  final bool showAllOption;
   const CategoryListSheet({
     super.key,
     required this.categories,
     required this.onEdit,
     required this.onDelete,
     required this.onAdd,
+    this.showAllOption = false,
   });
   @override
   Widget build(BuildContext context) {
@@ -22,20 +26,27 @@ class CategoryListSheet extends StatelessWidget {
           const ListTile(
             title: Text(
               'カテゴリを選択',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          ...categories.map((category) {
+
+          // フィルタ用途のときだけ表示
+          if (showAllOption)
+            ListTile(
+              leading: const Icon(Icons.list),
+              title: const Text('すべて'),
+              onTap: () {
+                Navigator.of(context).pop(-1);
+              },
+            ),
+          ...categories.where((category) => !category.isOther).map((category) {
             return ListTile(
               leading: CircleAvatar(
                 radius: 8,
                 backgroundColor: Color(category.color),
               ),
               title: Text(category.name),
-              // 行自体を押したら、
-              // このカテゴリを選択したとしてidを親に返す
+              // 普通のカテゴリを選んだ場合
               onTap: () {
                 Navigator.of(context).pop(category.id);
               },
@@ -44,25 +55,20 @@ class CategoryListSheet extends StatelessWidget {
                 children: [
                   IconButton(
                     tooltip: '編集',
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                    ),
+                    icon: const Icon(Icons.edit_outlined),
                     onPressed: () async {
-                      // 一度BottomSheetを閉じる
                       Navigator.of(context).pop();
-                      // 親から渡された編集処理を実行
+
                       await onEdit(category);
                     },
                   ),
-                  // 「その他」は削除させない
                   if (!category.isOther)
                     IconButton(
                       tooltip: '削除',
-                      icon: const Icon(
-                        Icons.delete_outline,
-                      ),
+                      icon: const Icon(Icons.delete_outline),
                       onPressed: () async {
                         Navigator.of(context).pop();
+
                         await onDelete(category);
                       },
                     ),
@@ -71,6 +77,19 @@ class CategoryListSheet extends StatelessWidget {
             );
           }),
           const Divider(),
+
+          ...categories.where((category) => category.isOther).map((category) {
+            return ListTile(
+              leading: CircleAvatar(
+                radius: 8,
+                backgroundColor: Color(category.color),
+              ),
+              title: Text(category.name),
+              onTap: () {
+                Navigator.of(context).pop(category.id);
+              },
+            );
+          }),
           ListTile(
             leading: const Icon(Icons.add),
             title: const Text('カテゴリを追加'),

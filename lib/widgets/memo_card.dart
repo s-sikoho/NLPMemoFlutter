@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../models/memo.dart';
+import '../models/category.dart';
+import '../thema/category_colors.dart';
 
 class MemoCard extends StatelessWidget {
   final Memo memo;
-  final String? categoryName;
+  final Category? category;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
@@ -13,12 +15,17 @@ class MemoCard extends StatelessWidget {
     required this.memo,
     required this.onTap,
     required this.onDelete,
-    this.categoryName,
+    this.category,
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final categoryColorSet = getCategoryColorSet(
+      Color(category?.color ?? Colors.grey.toARGB32()),
+    );
     return Card(
+      color: categoryColorSet.themeColor,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: InkWell(
         onTap: onTap,
@@ -34,14 +41,19 @@ class MemoCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       memo.title.isEmpty ? '無題' : memo.title,
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: categoryColorSet.textColor,
+                      ),
                     ),
                   ),
 
                   IconButton(
                     onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline),
+                    icon: Icon(
+                      Icons.delete_outline,
+                      color: categoryColorSet.textColor,
+                    ),
                   ),
                 ],
               ),
@@ -53,15 +65,18 @@ class MemoCard extends StatelessWidget {
                   memo.content,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: categoryColorSet.textColor),
                 ),
               ],
-
-              if (categoryName != null) ...[
+              if (category != null) ...[
                 const SizedBox(height: 12),
-
                 Chip(
-                  label: Text(categoryName!),
+                  backgroundColor: categoryColorSet.subColor,
+                  label: Text(
+                    category!.name,
+                    style: TextStyle(color: Colors.black),
+                  ),
                   visualDensity: VisualDensity.compact,
                 ),
               ],

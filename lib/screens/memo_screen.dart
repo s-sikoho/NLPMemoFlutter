@@ -30,15 +30,15 @@ class _MemoScreenState extends State<MemoScreen> {
   final CategoryRepository _categoryRepository = CategoryRepository();
   final CategoryDeleteService _categoryDeleteService = CategoryDeleteService();
   final _categoryColors = <Color>[
-    Colors.blue,
-    Colors.red,
-    Colors.green,
-    Colors.orange,
-    Colors.purple,
-    Colors.teal,
-    Colors.pink,
-    Colors.brown,
-  ];
+  Colors.blue,
+  Colors.red,
+  Colors.green,
+  Colors.orange,
+  Colors.purple,
+  Colors.teal,
+  Colors.pink,
+  Colors.brown,
+];
   List<Memo> _memos = [];
   List<Category> _categories = [];
 
@@ -48,10 +48,10 @@ class _MemoScreenState extends State<MemoScreen> {
   int? _filterCategoryId;
   String _searchKeyword = '';
 
-  String? _getCategoryName(int categoryId) {
+  Category? _getCategory(int categoryId) {
     for (final category in _categories) {
       if (category.id == categoryId) {
-        return category.name;
+        return category;
       }
     }
     return null;
@@ -349,7 +349,7 @@ class _MemoScreenState extends State<MemoScreen> {
 
                     return MemoCard(
                       memo: memo,
-                      categoryName: _getCategoryName(memo.categoryId),
+                      category: _getCategory(memo.categoryId),
                       onTap: () {
                         _openEditScreen(memo);
                       },

@@ -1,0 +1,454 @@
+[
+  {
+    "title": "レポート提出",
+    "content": "大学の講義レポートを提出する",
+    "categoryId": 1
+  },
+  {
+    "title": "試験日程",
+    "content": "期末試験の日程を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "講義資料",
+    "content": "授業で使う講義資料をダウンロードする",
+    "categoryId": 1
+  },
+  {
+    "title": "課題確認",
+    "content": "次回の授業までに提出する課題を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "履修登録",
+    "content": "今学期の履修科目を登録する",
+    "categoryId": 1
+  },
+  {
+    "title": "教室確認",
+    "content": "明日の講義が行われる教室を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "ゼミ準備",
+    "content": "ゼミで発表する資料を準備する",
+    "categoryId": 1
+  },
+  {
+    "title": "出席確認",
+    "content": "講義の出席状況を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "成績確認",
+    "content": "学期末の成績を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "研究室",
+    "content": "研究室の説明会の日程を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "図書館",
+    "content": "大学図書館で参考文献を借りる",
+    "categoryId": 1
+  },
+  {
+    "title": "学生証",
+    "content": "学生証の更新手続きを確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "学食",
+    "content": "昼休みに大学の学食へ行く",
+    "categoryId": 1
+  },
+  {
+    "title": "授業開始",
+    "content": "次の講義の開始時刻を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "発表準備",
+    "content": "授業内発表のスライドを作成する",
+    "categoryId": 1
+  },
+  {
+    "title": "教授に質問",
+    "content": "講義内容について教授に質問する",
+    "categoryId": 1
+  },
+  {
+    "title": "単位確認",
+    "content": "卒業に必要な単位数を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "時間割",
+    "content": "来週の大学の時間割を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "休講情報",
+    "content": "授業が休講になっていないか確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "補講情報",
+    "content": "補講の日程と教室を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "演習問題",
+    "content": "講義で出された演習問題を解く",
+    "categoryId": 1
+  },
+  {
+    "title": "教科書購入",
+    "content": "授業で指定された教科書を購入する",
+    "categoryId": 1
+  },
+  {
+    "title": "オフィスアワー",
+    "content": "先生のオフィスアワーを確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "学内イベント",
+    "content": "大学で開催される説明会に参加する",
+    "categoryId": 1
+  },
+  {
+    "title": "奨学金",
+    "content": "奨学金の申請期限を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "卒業要件",
+    "content": "卒業要件を大学の資料で確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "課題提出先",
+    "content": "レポートの提出先を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "オンライン講義",
+    "content": "オンライン授業の接続先を確認する",
+    "categoryId": 1
+  },
+  {
+    "title": "グループ課題",
+    "content": "大学のグループ課題の担当部分を進める",
+    "categoryId": 1
+  },
+  {
+    "title": "学生ポータル",
+    "content": "大学の学生ポータルでお知らせを確認する",
+    "categoryId": 1
+  },
+
+  {
+    "title": "買い物",
+    "content": "スーパーで牛乳と卵を買う",
+    "categoryId": 2
+  },
+  {
+    "title": "掃除",
+    "content": "部屋の掃除をする",
+    "categoryId": 2
+  },
+  {
+    "title": "洗濯",
+    "content": "洗濯物を洗って干す",
+    "categoryId": 2
+  },
+  {
+    "title": "夕食",
+    "content": "今日の夕食の材料を買う",
+    "categoryId": 2
+  },
+  {
+    "title": "ゴミ出し",
+    "content": "明日の朝に燃えるゴミを出す",
+    "categoryId": 2
+  },
+  {
+    "title": "料理",
+    "content": "夕食に生姜焼きを作る",
+    "categoryId": 2
+  },
+  {
+    "title": "日用品",
+    "content": "ティッシュと洗剤を買う",
+    "categoryId": 2
+  },
+  {
+    "title": "予定",
+    "content": "週末の予定を確認する",
+    "categoryId": 2
+  },
+  {
+    "title": "散髪",
+    "content": "美容院の予約を取る",
+    "categoryId": 2
+  },
+  {
+    "title": "病院",
+    "content": "病院の予約時間を確認する",
+    "categoryId": 2
+  },
+  {
+    "title": "銀行",
+    "content": "銀行で必要な手続きをする",
+    "categoryId": 2
+  },
+  {
+    "title": "郵便",
+    "content": "郵便局で荷物を発送する",
+    "categoryId": 2
+  },
+  {
+    "title": "家賃",
+    "content": "今月の家賃を支払う",
+    "categoryId": 2
+  },
+  {
+    "title": "電気代",
+    "content": "電気料金の支払いを確認する",
+    "categoryId": 2
+  },
+  {
+    "title": "水道代",
+    "content": "水道料金の明細を確認する",
+    "categoryId": 2
+  },
+  {
+    "title": "食材",
+    "content": "冷蔵庫の食材を確認して買い足す",
+    "categoryId": 2
+  },
+  {
+    "title": "朝食",
+    "content": "明日の朝食用のパンを買う",
+    "categoryId": 2
+  },
+  {
+    "title": "片付け",
+    "content": "机の上を整理する",
+    "categoryId": 2
+  },
+  {
+    "title": "衣替え",
+    "content": "季節に合わせて服を入れ替える",
+    "categoryId": 2
+  },
+  {
+    "title": "買い忘れ",
+    "content": "歯磨き粉を買うのを忘れない",
+    "categoryId": 2
+  },
+  {
+    "title": "交通",
+    "content": "電車の時刻を確認して出発する",
+    "categoryId": 2
+  },
+  {
+    "title": "旅行準備",
+    "content": "旅行に必要な持ち物を準備する",
+    "categoryId": 2
+  },
+  {
+    "title": "睡眠",
+    "content": "今日は早めに寝る",
+    "categoryId": 2
+  },
+  {
+    "title": "運動",
+    "content": "夕方に散歩をする",
+    "categoryId": 2
+  },
+  {
+    "title": "飲み物",
+    "content": "水とお茶を買っておく",
+    "categoryId": 2
+  },
+  {
+    "title": "掃除用品",
+    "content": "掃除用のスポンジを買う",
+    "categoryId": 2
+  },
+  {
+    "title": "宅配便",
+    "content": "届く予定の荷物を受け取る",
+    "categoryId": 2
+  },
+  {
+    "title": "冷蔵庫",
+    "content": "冷蔵庫の中を整理する",
+    "categoryId": 2
+  },
+  {
+    "title": "献立",
+    "content": "今週の夕食の献立を考える",
+    "categoryId": 2
+  },
+  {
+    "title": "生活用品",
+    "content": "シャンプーと石けんを補充する",
+    "categoryId": 2
+  },
+
+  {
+    "title": "Flutter",
+    "content": "FlutterのStatefulWidgetについて調べる",
+    "categoryId": 3
+  },
+  {
+    "title": "Dart",
+    "content": "DartのFutureとasync awaitを復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "Rust",
+    "content": "Rustの所有権と借用について復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "SQLite",
+    "content": "SQLiteのテーブル設計を整理する",
+    "categoryId": 3
+  },
+  {
+    "title": "ONNX",
+    "content": "ONNX Runtimeでモデル推論を行う方法を確認する",
+    "categoryId": 3
+  },
+  {
+    "title": "機械学習",
+    "content": "文章埋め込みとコサイン類似度について調べる",
+    "categoryId": 3
+  },
+  {
+    "title": "Git",
+    "content": "Gitでブランチを作成して変更を管理する",
+    "categoryId": 3
+  },
+  {
+    "title": "GitHub",
+    "content": "GitHubへコードをpushする",
+    "categoryId": 3
+  },
+  {
+    "title": "VSCode",
+    "content": "VSCodeの拡張機能と設定を確認する",
+    "categoryId": 3
+  },
+  {
+    "title": "データベース",
+    "content": "RepositoryからSQLiteへアクセスする処理を整理する",
+    "categoryId": 3
+  },
+  {
+    "title": "API",
+    "content": "REST APIのGETとPOSTの違いを復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "HTTP",
+    "content": "HTTPリクエストとレスポンスの仕組みを調べる",
+    "categoryId": 3
+  },
+  {
+    "title": "ネットワーク",
+    "content": "TCPとUDPの違いを復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "Linux",
+    "content": "Linuxのプロセス確認コマンドを調べる",
+    "categoryId": 3
+  },
+  {
+    "title": "Docker",
+    "content": "Dockerfileとイメージの関係を整理する",
+    "categoryId": 3
+  },
+  {
+    "title": "Python",
+    "content": "Pythonのクラスとインスタンスについて復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "C言語",
+    "content": "C言語のポインタとメモリ管理を復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "C++",
+    "content": "C++の参照とポインタの違いを確認する",
+    "categoryId": 3
+  },
+  {
+    "title": "JavaScript",
+    "content": "JavaScriptのPromiseの仕組みを復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "非同期処理",
+    "content": "非同期処理でFutureがどのように値を返すか整理する",
+    "categoryId": 3
+  },
+  {
+    "title": "Widget",
+    "content": "FlutterのWidgetツリーとBuildContextを復習する",
+    "categoryId": 3
+  },
+  {
+    "title": "State",
+    "content": "setStateで画面が再buildされる仕組みを確認する",
+    "categoryId": 3
+  },
+  {
+    "title": "FFI",
+    "content": "FlutterとRustをFFIで接続する仕組みを整理する",
+    "categoryId": 3
+  },
+  {
+    "title": "Tokenizer",
+    "content": "Hugging Face tokenizerで文章をトークン化する",
+    "categoryId": 3
+  },
+  {
+    "title": "Embedding",
+    "content": "384次元の文章embeddingを生成する処理を確認する",
+    "categoryId": 3
+  },
+  {
+    "title": "コサイン類似度",
+    "content": "embedding同士のコサイン類似度を計算する",
+    "categoryId": 3
+  },
+  {
+    "title": "Git pull",
+    "content": "git pullでmergeとrebaseの違いを確認する",
+    "categoryId": 3
+  },
+  {
+    "title": "デバッグ",
+    "content": "エラーメッセージから原因となる処理を特定する",
+    "categoryId": 3
+  },
+  {
+    "title": "アーキテクチャ",
+    "content": "RepositoryとServiceの責務の違いを整理する",
+    "categoryId": 3
+  },
+  {
+    "title": "ローカルアプリ",
+    "content": "バックエンドを使わず端末内だけで処理する構成を整理する",
+    "categoryId": 3
+  }
+]

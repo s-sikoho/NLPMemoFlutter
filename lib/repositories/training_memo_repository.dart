@@ -6,7 +6,7 @@ class TrainingMemoRepository {
   Future<List<TrainingMemo>> getAllMemos() async {
     final db = await _appDatabase.database;
 
-    final maps = await db.query('memos', orderBy: 'id DESC');
+    final maps = await db.query('training_memos', orderBy: 'id DESC');
 
     return maps.map((map) => TrainingMemo.fromMap(map)).toList();
   }
@@ -15,7 +15,7 @@ class TrainingMemoRepository {
     final db = await _appDatabase.database;
 
     final maps = await db.query(
-      'memos',
+      'training_memos',
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
@@ -57,14 +57,14 @@ class TrainingMemoRepository {
   Future<int> insertMemo(TrainingMemo memo) async {
     final db = await _appDatabase.database;
 
-    return await db.insert('memos', memo.toMap());
+    return await db.insert('training_memos', memo.toMap());
   }
 
   Future<int> updateMemo(TrainingMemo memo) async {
     final db = await _appDatabase.database;
 
     return await db.update(
-      'memos',
+      'training_memos',
       memo.toMap(),
       where: 'id = ?',
       whereArgs: [memo.id],
@@ -74,7 +74,7 @@ class TrainingMemoRepository {
   Future<int> deleteMemo(int id) async {
     final db = await _appDatabase.database;
 
-    return await db.delete('memos', where: 'id = ?', whereArgs: [id]);
+    return await db.delete('training_memos', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> deleteByCategoryId(int categoryId) async {

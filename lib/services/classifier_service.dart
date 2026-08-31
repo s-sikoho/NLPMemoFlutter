@@ -35,8 +35,6 @@ class ClassifierService {
     _session = await _ort.createSessionFromAsset(
       'assets/models/multilingual_e5_small/model.onnx',
     );
-
-    print('E5 model loaded');
   }
 
   Future<int> predictCategory(String text) async {

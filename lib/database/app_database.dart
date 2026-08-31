@@ -1,6 +1,10 @@
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path/path.dart';
+
+import 'dart:convert';
+
 class AppDatabase {
   static final AppDatabase instance = AppDatabase._init();
 
@@ -63,6 +67,42 @@ class AppDatabase {
       )
     ''');
 
-    await db.insert("categories", {"id": 0, "name": "その他", "is_other": 1, "color" : Colors.white.toARGB32(),});
+    await db.insert("categories", {
+      "id": 0,
+      "name": "その他",
+      "is_other": 1,
+      "color": Colors.white.toARGB32(),
+    });
+    await db.insert("categories", {
+      "id": 1,
+      "name": "大学",
+      "is_other": 0,
+      "color": Colors.orange.toARGB32(),
+    });
+    await db.insert("categories", {
+      "id": 2,
+      "name": "生活",
+      "is_other": 0,
+      "color": Colors.pink.toARGB32(),
+    });
+    await db.insert("categories", {
+      "id": 3,
+      "name": "情報",
+      "is_other": 0,
+      "color": Colors.purple.toARGB32(),
+    });
+
+    final jsonString = await rootBundle.loadString(
+      'assets/data/default_training_data.json',
+    );
+    final List<dynamic> data = jsonDecode(jsonString);
+
+    for (final item in data) {
+      await db.insert('training_memos', {
+        'title': item['title'],
+        'content': item['content'],
+        'category_id': item['categoryId'],
+      });
+    }
   }
 }

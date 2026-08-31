@@ -18,8 +18,13 @@ import '../widgets/category_list_sheet.dart';
 import 'memo_edit_screen.dart';
 
 class MemoScreen extends StatefulWidget {
+  final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
-  const MemoScreen({super.key, required this.classifierService});
+  const MemoScreen({
+    super.key,
+    required this.classifierService,
+    required this.onToggleTheme,
+  });
 
   @override
   State<MemoScreen> createState() => _MemoScreenState();
@@ -48,10 +53,10 @@ class _MemoScreenState extends State<MemoScreen> {
   int? _filterCategoryId;
   String _searchKeyword = '';
 
-  String? _getCategoryName(int categoryId) {
+  Category? _getCategory(int categoryId) {
     for (final category in _categories) {
       if (category.id == categoryId) {
-        return category.name;
+        return category;
       }
     }
     return null;
@@ -264,9 +269,23 @@ class _MemoScreenState extends State<MemoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('メモ'),
-
+        title: TextField(
+          decoration: const InputDecoration(
+            hintText: 'メモを検索',
+            prefixIcon: Icon(Icons.search),
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            _searchKeyword = value;
+            _loadMemos();
+          },
+        ),
         actions: [
+          IconButton(
+            onPressed: widget.onToggleTheme,
+            tooltip: 'テーマ変更',
+            icon: const Icon(Icons.dark_mode),
+          ),
           IconButton(
             onPressed: _isTraining ? null : _train,
             tooltip: '学習',
@@ -297,22 +316,6 @@ class _MemoScreenState extends State<MemoScreen> {
 
     return Column(
       children: [
-        // 検索欄
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'メモを検索',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (value) {
-              _searchKeyword = value;
-              _loadMemos();
-            },
-          ),
-        ),
-
         // カテゴリ絞り込み
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -349,7 +352,7 @@ class _MemoScreenState extends State<MemoScreen> {
 
                     return MemoCard(
                       memo: memo,
-                      categoryName: _getCategoryName(memo.categoryId),
+                      category: _getCategory(memo.categoryId),
                       onTap: () {
                         _openEditScreen(memo);
                       },

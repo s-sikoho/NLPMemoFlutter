@@ -18,8 +18,13 @@ import '../widgets/category_list_sheet.dart';
 import 'memo_edit_screen.dart';
 
 class MemoScreen extends StatefulWidget {
+  final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
-  const MemoScreen({super.key, required this.classifierService});
+  const MemoScreen({
+    super.key,
+    required this.classifierService,
+    required this.onToggleTheme,
+  });
 
   @override
   State<MemoScreen> createState() => _MemoScreenState();
@@ -30,15 +35,15 @@ class _MemoScreenState extends State<MemoScreen> {
   final CategoryRepository _categoryRepository = CategoryRepository();
   final CategoryDeleteService _categoryDeleteService = CategoryDeleteService();
   final _categoryColors = <Color>[
-  Colors.blue,
-  Colors.red,
-  Colors.green,
-  Colors.orange,
-  Colors.purple,
-  Colors.teal,
-  Colors.pink,
-  Colors.brown,
-];
+    Colors.blue,
+    Colors.red,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.pink,
+    Colors.brown,
+  ];
   List<Memo> _memos = [];
   List<Category> _categories = [];
 
@@ -264,9 +269,23 @@ class _MemoScreenState extends State<MemoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('メモ'),
-
+        title: TextField(
+          decoration: const InputDecoration(
+            hintText: 'メモを検索',
+            prefixIcon: Icon(Icons.search),
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            _searchKeyword = value;
+            _loadMemos();
+          },
+        ),
         actions: [
+          IconButton(
+            onPressed: widget.onToggleTheme,
+            tooltip: 'テーマ変更',
+            icon: const Icon(Icons.dark_mode),
+          ),
           IconButton(
             onPressed: _isTraining ? null : _train,
             tooltip: '学習',
@@ -297,22 +316,6 @@ class _MemoScreenState extends State<MemoScreen> {
 
     return Column(
       children: [
-        // 検索欄
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'メモを検索',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (value) {
-              _searchKeyword = value;
-              _loadMemos();
-            },
-          ),
-        ),
-
         // カテゴリ絞り込み
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

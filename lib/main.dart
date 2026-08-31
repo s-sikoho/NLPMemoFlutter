@@ -5,23 +5,50 @@ import 'services/classifier_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   final classifierService = ClassifierService();
   await classifierService.initialize();
-
-  runApp(MyApp(classifierService: classifierService));
+  runApp(
+    MyApp(
+      classifierService: classifierService,
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final ClassifierService classifierService;
+  const MyApp({
+    super.key,
+    required this.classifierService,
+  });
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
-  const MyApp({super.key, required this.classifierService});
-
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.light;
+  void _toggleTheme() {
+    setState(() {
+      _themeMode =
+          _themeMode == ThemeMode.light
+              ? ThemeMode.dark
+              : ThemeMode.light;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MemoScreen(classifierService: classifierService),
+      theme: ThemeData(
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+      ),
+      themeMode: _themeMode,
+      home: MemoScreen(
+        classifierService: widget.classifierService,
+        onToggleTheme: _toggleTheme,
+      ),
     );
   }
 }

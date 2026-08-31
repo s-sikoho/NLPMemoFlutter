@@ -104,8 +104,5 @@ class AppDatabase {
         'category_id': item['categoryId'],
       });
     }
-    final rows = await db.query('training_memos');
-    print('training_memos count: ${rows.length}');
-    print(rows.take(5).toList());
   }
 }

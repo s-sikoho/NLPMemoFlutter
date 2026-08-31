@@ -7,7 +7,8 @@ class CategoryDeleteService {
   final CategoryEmbeddingRepository _categoryEmbeddingRepository =
       CategoryEmbeddingRepository();
   final MemoRepository _memoRepository = MemoRepository();
-  final TrainingMemoRepository _trainingMemoRepository = TrainingMemoRepository();
+  final TrainingMemoRepository _trainingMemoRepository =
+      TrainingMemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
   Future<void> deleteCategory(int categoryId) async {
     // 1. 「その他」カテゴリを取得

@@ -16,7 +16,8 @@ class ClassifierService {
   OrtSession? _session;
   final CategoryEmbeddingRepository _categoryEmbeddingRepository =
       CategoryEmbeddingRepository();
-  final TrainingMemoRepository _trainingMemoRepository = TrainingMemoRepository();
+  final TrainingMemoRepository _trainingMemoRepository =
+      TrainingMemoRepository();
   final MemoRepository _memoRepository = MemoRepository();
 
   Future<void> initialize() async {
@@ -29,6 +30,12 @@ class ClassifierService {
     await initTokenizer(tokenizerJson: data.buffer.asUint8List());
 
     await _initializeOnnx();
+
+    final hasEmbedding = await _categoryEmbeddingRepository.existsAny();
+
+    if (!hasEmbedding) {
+      await train();
+    }
   }
 
   Future<void> _initializeOnnx() async {

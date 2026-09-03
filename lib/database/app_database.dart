@@ -55,6 +55,8 @@ class AppDatabase {
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         category_id INTEGER NOT NULL
+        scheduled_at INTEGER,
+        notification_enabled INTEGER NOT NULL DEFAULT 0
       )
     ''');
 

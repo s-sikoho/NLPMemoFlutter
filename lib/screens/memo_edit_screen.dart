@@ -289,6 +289,15 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     });
   }
 
+  String _formatScheduledAt(DateTime dateTime) {
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+
+    return '${dateTime.year}/$month/$day $hour:$minute';
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -362,9 +371,15 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                     Row(
                       children: [
                         const Icon(Icons.schedule),
-
                         const SizedBox(width: 8),
-                        Expanded(child: Text(_scheduledAt.toString())),
+                        Expanded(
+                          child: Text(_formatScheduledAt(_scheduledAt!)),
+                        ),
+                        Icon(
+                          _notificationEnabled
+                              ? Icons.notifications
+                              : Icons.notifications_none,
+                        ),
                         Switch(
                           value: _notificationEnabled,
                           onChanged: _setNotificationEnabled,

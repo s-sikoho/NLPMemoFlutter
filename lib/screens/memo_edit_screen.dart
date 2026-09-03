@@ -46,6 +46,8 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   bool _isLoading = true;
   bool get _isEditMode => widget.memo != null;
   bool _isPredicting = false;
+  DateTime? _scheduledAt;
+  bool _notificationEnabled = false;
 
   @override
   void initState() {
@@ -55,6 +57,8 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
       _titleController.text = memo.title;
       _contentController.text = memo.content;
       _selectedCategoryId = memo.categoryId;
+      _scheduledAt = memo.scheduledAt;
+      _notificationEnabled = memo.notificationEnabled;
     }
     _loadCategories();
   }
@@ -78,11 +82,16 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     if (categoryId == null) {
       return;
     }
+    if (_notificationEnabled && _scheduledAt == null) {
+      return;
+    }
     final memo = Memo(
       id: widget.memo?.id,
       title: _titleController.text,
       content: _contentController.text,
       categoryId: categoryId,
+      scheduledAt: _scheduledAt,
+      notificationEnabled: _notificationEnabled,
     );
     if (_isEditMode) {
       await _memoSaveService.updateMemo(memo);
@@ -231,6 +240,55 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     });
   }
 
+  Future<void> _selectScheduleDateTime() async {
+    final now = DateTime.now();
+    final initialDate = _scheduledAt ?? now;
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now,
+      lastDate: DateTime(now.year + 10),
+    );
+    if (selectedDate == null || !mounted) {
+      return;
+    }
+    final initialTime = _scheduledAt != null
+        ? TimeOfDay.fromDateTime(_scheduledAt!)
+        : TimeOfDay.now();
+    final selectedTime = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
+    if (selectedTime == null || !mounted) {
+      return;
+    }
+    setState(() {
+      _scheduledAt = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        selectedTime.hour,
+        selectedTime.minute,
+      );
+    });
+  }
+
+  void _clearSchedule() {
+    setState(() {
+      _scheduledAt = null;
+      _notificationEnabled = false;
+    });
+  }
+
+  void _setNotificationEnabled(bool value) {
+    if (_scheduledAt == null) {
+      return;
+    }
+    setState(() {
+      _notificationEnabled = value;
+    });
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -275,7 +333,6 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                       _showCategorySelector();
                     },
                   ),
-
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
@@ -290,6 +347,34 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                       label: Text(_isPredicting ? '予測中' : 'カテゴリを自動予測'),
                     ),
                   ),
+
+                  if (_scheduledAt == null)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: _selectScheduleDateTime,
+                        icon: const Icon(Icons.calendar_month),
+                        label: const Text('日時を追加'),
+                      ),
+                    ),
+
+                  if (_scheduledAt != null)
+                    Row(
+                      children: [
+                        const Icon(Icons.schedule),
+
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(_scheduledAt.toString())),
+                        Switch(
+                          value: _notificationEnabled,
+                          onChanged: _setNotificationEnabled,
+                        ),
+                        IconButton(
+                          onPressed: _clearSchedule,
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
 
                   const SizedBox(height: 16),
 

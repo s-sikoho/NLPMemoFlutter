@@ -53,6 +53,8 @@ class _MemoScreenState extends State<MemoScreen> {
   int? _filterCategoryId;
   String _searchKeyword = '';
 
+  bool _scheduledOnly = false;
+
   Category? _getCategory(int categoryId) {
     for (final category in _categories) {
       if (category.id == categoryId) {
@@ -129,6 +131,7 @@ class _MemoScreenState extends State<MemoScreen> {
     final memos = await _memoRepository.getFilteredMemos(
       categoryId: _filterCategoryId,
       keyword: _searchKeyword,
+      scheduledOnly: _scheduledOnly,
     );
     if (!mounted) {
       return;
@@ -235,6 +238,14 @@ class _MemoScreenState extends State<MemoScreen> {
     await _loadMemos();
   }
 
+  void _setScheduledOnly(bool value) {
+    setState(() {
+      _scheduledOnly = value;
+    });
+
+    _loadMemos();
+  }
+
   Future<void> _showFilterCategorySheet() async {
     final selectedId = await showModalBottomSheet<int>(
       context: context,
@@ -245,6 +256,8 @@ class _MemoScreenState extends State<MemoScreen> {
           onAdd: _addCategory,
           onEdit: _editCategory,
           onDelete: _deleteCategory,
+          scheduledOnly: _scheduledOnly,
+          onScheduledChanged: _setScheduledOnly,
         );
       },
     );

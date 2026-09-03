@@ -60,6 +60,7 @@ class MemoRepository {
   Future<List<Memo>> getFilteredMemos({
     int? categoryId,
     String? keyword,
+    bool scheduledOnly = false,
   }) async {
     final db = await AppDatabase.instance.database;
     final whereParts = <String>[];
@@ -73,11 +74,14 @@ class MemoRepository {
       whereArgs.add('%${keyword.trim()}%');
       whereArgs.add('%${keyword.trim()}%');
     }
+    if (scheduledOnly) {
+      whereParts.add('scheduled_at IS NOT NULL');
+    }
     final maps = await db.query(
       'memos',
       where: whereParts.isEmpty ? null : whereParts.join(' AND '),
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
-      orderBy: 'id DESC',
+      orderBy: scheduledOnly ? 'scheduled_at ASC' : 'id DESC',
     );
     return maps.map((map) => Memo.fromMap(map)).toList();
   }

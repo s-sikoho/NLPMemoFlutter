@@ -290,12 +290,37 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   }
 
   String _formatScheduledAt(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final targetDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    final startOfThisWeek = today.subtract(Duration(days: today.weekday - 1));
+    final startOfNextWeek = startOfThisWeek.add(const Duration(days: 7));
+    final startOfWeekAfterNext = startOfThisWeek.add(const Duration(days: 14));
+    final weekdays = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'];
+    final weekday = weekdays[dateTime.weekday - 1];
+    String? relativeText;
+    if (targetDate == today) {
+      relativeText = '今日';
+    } else if (targetDate == tomorrow) {
+      relativeText = '明日';
+    } else if (!targetDate.isBefore(startOfThisWeek) &&
+        targetDate.isBefore(startOfNextWeek)) {
+      relativeText = '今週$weekday';
+    } else if (!targetDate.isBefore(startOfNextWeek) &&
+        targetDate.isBefore(startOfWeekAfterNext)) {
+      relativeText = '来週$weekday';
+    }
     final month = dateTime.month.toString().padLeft(2, '0');
     final day = dateTime.day.toString().padLeft(2, '0');
     final hour = dateTime.hour.toString().padLeft(2, '0');
     final minute = dateTime.minute.toString().padLeft(2, '0');
-
-    return '${dateTime.year}/$month/$day $hour:$minute';
+    final dateText = '${dateTime.year}/$month/$day';
+    final timeText = '$hour:$minute';
+    if (relativeText != null) {
+      return '$dateText ($relativeText) $timeText';
+    }
+    return '$dateText $timeText';
   }
 
   @override

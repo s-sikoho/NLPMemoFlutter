@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../models/category.dart';
-
-class CategoryListSheet extends StatelessWidget {
+class CategoryListSheet extends StatefulWidget {
   final List<Category> categories;
 
   final Future<void> Function(Category category) onEdit;
   final Future<void> Function(Category category) onDelete;
   final Future<void> Function() onAdd;
+
   final bool showAllOption;
+  final bool scheduledOnly;
+  final ValueChanged<bool>? onScheduledChanged;
+
   const CategoryListSheet({
     super.key,
     required this.categories,
@@ -16,7 +19,24 @@ class CategoryListSheet extends StatelessWidget {
     required this.onDelete,
     required this.onAdd,
     this.showAllOption = false,
+    this.scheduledOnly = false,
+    this.onScheduledChanged,
   });
+
+  @override
+  State<CategoryListSheet> createState() =>
+      _CategoryListSheetState();
+}
+class _CategoryListSheetState extends State<CategoryListSheet> {
+  late bool _scheduledOnly;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scheduledOnly = widget.scheduledOnly;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -30,8 +50,7 @@ class CategoryListSheet extends StatelessWidget {
             ),
           ),
 
-          // フィルタ用途のときだけ表示
-          if (showAllOption)
+          if (widget.showAllOption)
             ListTile(
               leading: const Icon(Icons.list),
               title: const Text('すべて'),
@@ -39,7 +58,21 @@ class CategoryListSheet extends StatelessWidget {
                 Navigator.of(context).pop(-1);
               },
             ),
-          ...categories.where((category) => !category.isOther).map((category) {
+
+          if (widget.showAllOption)
+            SwitchListTile(
+              secondary: const Icon(Icons.calendar_month),
+              title: const Text('日時付きのみ'),
+              value: _scheduledOnly,
+              onChanged: (value) {
+                setState(() {
+                  _scheduledOnly = value;
+                });
+
+                widget.onScheduledChanged?.call(value);
+              },
+            ),
+            ...widget.categories.where((category) => !category.isOther).map((category) {
             return ListTile(
               leading: CircleAvatar(
                 radius: 8,
@@ -59,7 +92,7 @@ class CategoryListSheet extends StatelessWidget {
                     onPressed: () async {
                       Navigator.of(context).pop();
 
-                      await onEdit(category);
+                      await widget.onEdit(category);
                     },
                   ),
                   if (!category.isOther)
@@ -69,7 +102,7 @@ class CategoryListSheet extends StatelessWidget {
                       onPressed: () async {
                         Navigator.of(context).pop();
 
-                        await onDelete(category);
+                        await widget.onDelete(category);
                       },
                     ),
                 ],
@@ -78,7 +111,7 @@ class CategoryListSheet extends StatelessWidget {
           }),
           const Divider(),
 
-          ...categories.where((category) => category.isOther).map((category) {
+          ...widget.categories.where((category) => category.isOther).map((category) {
             return ListTile(
               leading: CircleAvatar(
                 radius: 8,
@@ -95,7 +128,7 @@ class CategoryListSheet extends StatelessWidget {
             title: const Text('カテゴリを追加'),
             onTap: () async {
               Navigator.of(context).pop();
-              await onAdd();
+              await widget.onAdd();
             },
           ),
         ],

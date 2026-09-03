@@ -279,6 +279,9 @@ class _MemoScreenState extends State<MemoScreen> {
             _searchKeyword = value;
             _loadMemos();
           },
+          onTapOutside: (_) {
+            FocusScope.of(context).unfocus();
+          },
         ),
         actions: [
           IconButton(

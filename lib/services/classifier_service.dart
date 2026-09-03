@@ -29,6 +29,12 @@ class ClassifierService {
     await initTokenizer(tokenizerJson: data.buffer.asUint8List());
 
     await _initializeOnnx();
+
+    final hasEmbedding = await _categoryEmbeddingRepository.existsAny();
+
+    if (!hasEmbedding) {
+      await train();
+    }
   }
 
   Future<void> _initializeOnnx() async {

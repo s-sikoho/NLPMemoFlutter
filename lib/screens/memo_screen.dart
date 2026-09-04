@@ -14,8 +14,10 @@ import '../widgets/category_add_dialog.dart';
 import '../widgets/category_delete_confirm_dialog.dart';
 import '../widgets/category_edit_dialog.dart';
 import '../widgets/category_list_sheet.dart';
+import '../widgets/common_buttons.dart';
 
 import 'memo_edit_screen.dart';
+import 'calendar_screen.dart';
 
 class MemoScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -48,7 +50,6 @@ class _MemoScreenState extends State<MemoScreen> {
   List<Category> _categories = [];
 
   bool _isLoading = true;
-  bool _isTraining = false;
 
   int? _filterCategoryId;
   String _searchKeyword = '';
@@ -69,62 +70,6 @@ class _MemoScreenState extends State<MemoScreen> {
     super.initState();
     _loadCategories();
     _loadMemos();
-  }
-
-  Future<void> _train() async {
-    if (_isTraining) {
-      return;
-    }
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('学習を実行しますか？'),
-          content: const Text('現在の学習用データを使ってカテゴリ分類用データを更新します。'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('キャンセル'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('学習する'),
-            ),
-          ],
-        );
-      },
-    );
-    if (confirmed != true) {
-      return;
-    }
-    setState(() {
-      _isTraining = true;
-    });
-    try {
-      await widget.classifierService.train();
-
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('学習が完了しました')));
-    } catch (e) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('学習に失敗しました: $e')));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isTraining = false;
-        });
-      }
-    }
   }
 
   Future<void> _loadMemos() async {
@@ -246,6 +191,22 @@ class _MemoScreenState extends State<MemoScreen> {
     _loadMemos();
   }
 
+  Future<void> _openCalendarScreen() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return CalendarScreen(
+            onToggleTheme: widget.onToggleTheme,
+            classifierService: widget.classifierService,
+          );
+        },
+      ),
+    );
+
+    await _loadCategories();
+    await _loadMemos();
+  }
+
   Future<void> _showFilterCategorySheet() async {
     final selectedId = await showModalBottomSheet<int>(
       context: context,
@@ -280,48 +241,31 @@ class _MemoScreenState extends State<MemoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          decoration: const InputDecoration(
-            hintText: 'メモを検索',
-            prefixIcon: Icon(Icons.search),
-            border: InputBorder.none,
-          ),
-          onChanged: (value) {
-            _searchKeyword = value;
-            _loadMemos();
-          },
-          onTapOutside: (_) {
-            FocusScope.of(context).unfocus();
-          },
+    return MainScaffold(
+      title: TextField(
+        decoration: const InputDecoration(
+          hintText: 'メモを検索',
+          prefixIcon: Icon(Icons.search),
+          border: InputBorder.none,
         ),
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            tooltip: 'テーマ変更',
-            icon: const Icon(Icons.dark_mode),
-          ),
-          IconButton(
-            onPressed: _isTraining ? null : _train,
-            tooltip: '学習',
-            icon: _isTraining
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.school),
-          ),
-        ],
+        onChanged: (value) {
+          _searchKeyword = value;
+          _loadMemos();
+        },
+        onTapOutside: (_) {
+          FocusScope.of(context).unfocus();
+        },
       ),
 
       body: _buildBody(),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openCreateScreen,
-        child: const Icon(Icons.add),
-      ),
+      onToggleTheme: widget.onToggleTheme,
+      classifierService: widget.classifierService,
+
+      onCreateMemo: _openCreateScreen,
+
+      isCalendarScreen: false,
+      onSwitchScreen: _openCalendarScreen,
     );
   }
 

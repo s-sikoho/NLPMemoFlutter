@@ -67,4 +67,16 @@ class CategoryEmbeddingRepository {
       'category_embeddings',
     );
   }
+
+  Future<bool> existsAny() async {
+    final db = await AppDatabase.instance.database;
+
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) AS count FROM category_embeddings',
+    );
+
+    final count = Sqflite.firstIntValue(result) ?? 0;
+
+    return count > 0;
+  }
 }

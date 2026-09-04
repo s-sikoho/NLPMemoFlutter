@@ -69,7 +69,25 @@ class _MemoScreenState extends State<MemoScreen> {
   void initState() {
     super.initState();
     _loadCategories();
-    _loadMemos();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    final memos = await _memoRepository.getFilteredMemos(
+      categoryId: _filterCategoryId,
+      keyword: _searchKeyword,
+      scheduledOnly: _scheduledOnly,
+    );
+    final categories = await _categoryRepository.getAllCategories();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _memos = memos;
+      _categories = categories;
+      _isLoading = false;
+    });
   }
 
   Future<void> _loadMemos() async {
@@ -83,7 +101,6 @@ class _MemoScreenState extends State<MemoScreen> {
     }
     setState(() {
       _memos = memos;
-      _isLoading = false;
     });
   }
 

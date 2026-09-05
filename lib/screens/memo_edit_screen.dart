@@ -18,7 +18,13 @@ import '../widgets/category_delete_confirm_dialog.dart';
 class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
   final ClassifierService classifierService;
-  const MemoEditScreen({super.key, this.memo, required this.classifierService});
+  final DateTime? initialScheduledAt;
+  const MemoEditScreen({
+    super.key,
+    this.memo,
+    required this.classifierService,
+    this.initialScheduledAt,
+  });
   @override
   State<MemoEditScreen> createState() => _MemoEditScreenState();
 }
@@ -59,6 +65,8 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
       _selectedCategoryId = memo.categoryId;
       _scheduledAt = memo.scheduledAt;
       _notificationEnabled = memo.notificationEnabled;
+    } else {
+      _scheduledAt = widget.initialScheduledAt;
     }
     _loadCategories();
   }

@@ -10,6 +10,8 @@ import '../repositories/category_repository.dart';
 import '../models/memo.dart';
 import '../models/category.dart';
 
+import 'day_screen.dart';
+
 class CalendarScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
@@ -98,6 +100,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return result;
   }
 
+  Future<void> _openDayScreen(DateTime date) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return DayScreen(
+            date: date,
+            onToggleTheme: widget.onToggleTheme,
+            classifierService: widget.classifierService,
+          );
+        },
+      ),
+    );
+
+    // DayScreenから戻ってきた後に最新データを再取得
+    await _loadCategories();
+    await _loadMemos();
+  }
+
   void _backToMemoScreen() {
     Navigator.of(context).pop();
   }
@@ -149,7 +169,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
       onToggleTheme: widget.onToggleTheme,
       classifierService: widget.classifierService,
-      isCalendarScreen: true,
     );
   }
 
@@ -183,7 +202,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
               if (day <= 0) {
                 return const SizedBox();
               }
-              final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+              final date = DateTime(
+                _focusedMonth.year,
+                _focusedMonth.month,
+                day,
+              );
               final memos = groupedMemos[date] ?? [];
               return _buildDayCell(date, memos);
             },
@@ -197,37 +220,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final colors = memos
         .map((memo) => _getCategory(memo.categoryId))
         .whereType<Category>()
-        .map((category) => Color(category.color))
+        .map((category) {
+          if (category.isOther) {
+            return Colors.grey;
+          }
+          return Color(category.color);
+        })
         .toSet()
         .toList();
     final visibleColors = colors.take(3).toList();
-
-    return Stack(
-      children: [
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('${date.day}', style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: visibleColors.map((color) {
-                  return Container(
-                    width: 5,
-                    height: 5,
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
+    return InkWell(
+      onTap: () {
+        _openDayScreen(date);
+      },
+      child: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${date.day}', style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: visibleColors.map((color) {
+                    return Container(
+                      width: 5,
+                      height: 5,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

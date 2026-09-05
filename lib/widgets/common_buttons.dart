@@ -13,8 +13,6 @@ class MainScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final Widget? bottomNavigationBar;
 
-  final bool isCalendarScreen;
-
   const MainScaffold({
     super.key,
     required this.title,
@@ -23,7 +21,6 @@ class MainScaffold extends StatelessWidget {
     required this.classifierService,
     this.floatingActionButton,
     this.bottomNavigationBar,
-    required this.isCalendarScreen,
   });
 
   @override

@@ -11,6 +11,7 @@ class CategoryListSheet extends StatefulWidget {
   final bool showAllOption;
   final bool scheduledOnly;
   final ValueChanged<bool>? onScheduledChanged;
+  final bool showScheduledOption;
 
   const CategoryListSheet({
     super.key,
@@ -21,6 +22,7 @@ class CategoryListSheet extends StatefulWidget {
     this.showAllOption = false,
     this.scheduledOnly = false,
     this.onScheduledChanged,
+    this.showScheduledOption = false,
   });
 
   @override
@@ -59,7 +61,7 @@ class _CategoryListSheetState extends State<CategoryListSheet> {
               },
             ),
 
-          if (widget.showAllOption)
+          if (widget.showScheduledOption)
             SwitchListTile(
               secondary: const Icon(Icons.calendar_month),
               title: const Text('日時付きのみ'),

@@ -185,8 +185,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       0,
     ).day;
     final firstWeekday = firstDayOfMonth.weekday % 7;
-    final totalCells = firstWeekday - 1 + daysInMonth;
-
+    final totalCells = firstWeekday + daysInMonth;
     return Column(
       children: [
         _buildWeekdayHeader(),
@@ -198,7 +197,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             itemCount: totalCells,
             itemBuilder: (context, index) {
-              final day = index - (firstWeekday - 1) + 1;
+              final day = index - firstWeekday + 1;
               if (day <= 0) {
                 return const SizedBox();
               }
@@ -217,6 +216,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildDayCell(DateTime date, List<Memo> memos) {
+    final now = DateTime.now();
+
+    final isToday =
+        date.year == now.year && date.month == now.month && date.day == now.day;
+
+    Color? dayColor;
+
+    if (date.weekday == DateTime.sunday) {
+      dayColor = Colors.red;
+    } else if (date.weekday == DateTime.saturday) {
+      dayColor = Colors.blue;
+    }
     final colors = memos
         .map((memo) => _getCategory(memo.categoryId))
         .whereType<Category>()
@@ -239,7 +250,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('${date.day}', style: const TextStyle(fontSize: 16)),
+                Container(
+                  width: 30,
+                  height: 30,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isToday ? Colors.blue : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '${date.day}',
+                    style: TextStyle(
+                      color: isToday ? Colors.white : dayColor,
+                      fontWeight: isToday ? FontWeight.w900 : FontWeight.normal,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -267,11 +293,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
     const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
     return Row(
       children: weekdays.map((day) {
+        Color? color;
+        if (day == '日') {
+          color = Colors.red;
+        } else if (day == '土') {
+          color = Colors.blue;
+        }
         return Expanded(
           child: Center(
             child: Text(
               day,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, color: color),
             ),
           ),
         );

@@ -312,7 +312,7 @@ class _MemoScreenState extends State<MemoScreen> {
               borderRadius: BorderRadius.circular(8),
               side: const BorderSide(),
             ),
-            title: const Text('カテゴリ'),
+            title: const Text('絞り込み'),
             subtitle: Text(
               _filterCategoryId == null
                   ? 'すべて'

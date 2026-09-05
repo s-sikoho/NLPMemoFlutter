@@ -260,6 +260,37 @@ class _DayScreenState extends State<DayScreen> {
     );
   }
 
+  String _formatScheduleDate(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final targetDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    final startOfThisWeek = today.subtract(Duration(days: today.weekday - 1));
+    final startOfNextWeek = startOfThisWeek.add(const Duration(days: 7));
+    final startOfWeekAfterNext = startOfThisWeek.add(const Duration(days: 14));
+    final weekdays = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'];
+    final weekday = weekdays[dateTime.weekday - 1];
+    String? relativeText;
+    if (targetDate == today) {
+      relativeText = '今日';
+    } else if (targetDate == tomorrow) {
+      relativeText = '明日';
+    } else if (!targetDate.isBefore(startOfThisWeek) &&
+        targetDate.isBefore(startOfNextWeek)) {
+      relativeText = '今週$weekday';
+    } else if (!targetDate.isBefore(startOfNextWeek) &&
+        targetDate.isBefore(startOfWeekAfterNext)) {
+      relativeText = '来週$weekday';
+    }
+    final month = dateTime.month.toString();
+    final day = dateTime.day.toString();
+    final dateText = '$month 月 $day 日';
+    if (relativeText != null) {
+      return '$dateText ($relativeText)の予定';
+    }
+    return dateText;
+  }
+
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -271,9 +302,8 @@ class _DayScreenState extends State<DayScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text(
-              '${widget.date.year}年${widget.date.month}月${widget.date.day}日',
-              style: Theme.of(context).textTheme.titleLarge
+            child: Text(_formatScheduleDate(widget.date),
+            style: Theme.of(context).textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -286,7 +316,7 @@ class _DayScreenState extends State<DayScreen> {
               borderRadius: BorderRadius.circular(8),
               side: const BorderSide(),
             ),
-            title: const Text('カテゴリ'),
+            title: const Text('絞り込み'),
             subtitle: Text(
               _filterCategoryId == null
                   ? 'すべて'

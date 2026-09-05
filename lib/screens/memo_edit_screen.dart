@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../models/category.dart';
 import '../models/memo.dart';
@@ -260,13 +261,9 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     if (selectedDate == null || !mounted) {
       return;
     }
-    final initialTime = _scheduledAt != null
-        ? TimeOfDay.fromDateTime(_scheduledAt!)
-        : TimeOfDay.now();
-    final selectedTime = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
+    final baseDateTime = _scheduledAt ?? now;
+    final selectedTime = await _showTimeWheel(baseDateTime);
+
     if (selectedTime == null || !mounted) {
       return;
     }
@@ -275,6 +272,61 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         selectedDate.year,
         selectedDate.month,
         selectedDate.day,
+        selectedTime.hour,
+        selectedTime.minute,
+      );
+    });
+  }
+
+  Future<TimeOfDay?> _showTimeWheel(DateTime initialDateTime) async {
+    DateTime selected = initialDateTime;
+
+    return showModalBottomSheet<TimeOfDay>(
+      context: context,
+      builder: (context) {
+        return SizedBox(
+          height: 300,
+          child: Column(
+            children: [
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.time,
+                  initialDateTime: initialDateTime,
+                  use24hFormat: true,
+                  onDateTimeChanged: (value) {
+                    selected = value;
+                  },
+                ),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.of(context).pop(
+                    TimeOfDay(hour: selected.hour, minute: selected.minute),
+                  );
+                },
+                child: const Text('決定'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _editScheduleTime() async {
+    final scheduledAt = _scheduledAt;
+    if (scheduledAt == null) {
+      return;
+    }
+    final selectedTime = await _showTimeWheel(scheduledAt);
+    if (selectedTime == null || !mounted) {
+      return;
+    }
+    setState(() {
+      _scheduledAt = DateTime(
+        scheduledAt.year,
+        scheduledAt.month,
+        scheduledAt.day,
         selectedTime.hour,
         selectedTime.minute,
       );
@@ -297,7 +349,7 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     });
   }
 
-  String _formatScheduledAt(DateTime dateTime) {
+  String _formatScheduleDate(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
@@ -321,14 +373,19 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     }
     final month = dateTime.month.toString().padLeft(2, '0');
     final day = dateTime.day.toString().padLeft(2, '0');
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
     final dateText = '${dateTime.year}/$month/$day';
-    final timeText = '$hour:$minute';
     if (relativeText != null) {
-      return '$dateText ($relativeText) $timeText';
+      return '$dateText ($relativeText)';
     }
-    return '$dateText $timeText';
+    return dateText;
+  }
+
+  String _formatScheduleTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+
+    return '$hour:$minute';
   }
 
   @override
@@ -405,9 +462,19 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                       children: [
                         const Icon(Icons.schedule),
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(_formatScheduledAt(_scheduledAt!)),
+                        InkWell(
+                          onTap: _selectScheduleDateTime,
+                          child: Text(_formatScheduleDate(_scheduledAt!)),
                         ),
+
+                        const SizedBox(width: 12),
+
+                        InkWell(
+                          onTap: _editScheduleTime,
+                          child: Text(_formatScheduleTime(_scheduledAt!)),
+                        ),
+
+                        const Spacer(),
                         Icon(
                           _notificationEnabled
                               ? Icons.notifications

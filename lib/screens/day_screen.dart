@@ -17,22 +17,23 @@ import '../widgets/category_list_sheet.dart';
 import '../widgets/common_buttons.dart';
 
 import 'memo_edit_screen.dart';
-import 'calendar_screen.dart';
 
-class MemoScreen extends StatefulWidget {
+class DayScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
-  const MemoScreen({
+  final DateTime date;
+  const DayScreen({
     super.key,
     required this.classifierService,
     required this.onToggleTheme,
+    required this.date,
   });
 
   @override
-  State<MemoScreen> createState() => _MemoScreenState();
+  State<DayScreen> createState() => _DayScreenState();
 }
 
-class _MemoScreenState extends State<MemoScreen> {
+class _DayScreenState extends State<DayScreen> {
   final MemoRepository _memoRepository = MemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
   final CategoryDeleteService _categoryDeleteService = CategoryDeleteService();
@@ -54,8 +55,6 @@ class _MemoScreenState extends State<MemoScreen> {
   int? _filterCategoryId;
   String _searchKeyword = '';
 
-  bool _scheduledOnly = false;
-
   Category? _getCategory(int categoryId) {
     for (final category in _categories) {
       if (category.id == categoryId) {
@@ -75,7 +74,7 @@ class _MemoScreenState extends State<MemoScreen> {
     final memos = await _memoRepository.getFilteredMemos(
       categoryId: _filterCategoryId,
       keyword: _searchKeyword,
-      scheduledOnly: _scheduledOnly,
+      date: widget.date,
     );
     final categories = await _categoryRepository.getAllCategories();
     if (!mounted) {
@@ -93,7 +92,7 @@ class _MemoScreenState extends State<MemoScreen> {
     final memos = await _memoRepository.getFilteredMemos(
       categoryId: _filterCategoryId,
       keyword: _searchKeyword,
-      scheduledOnly: _scheduledOnly,
+      date: widget.date,
     );
     if (!mounted) {
       return;
@@ -117,7 +116,10 @@ class _MemoScreenState extends State<MemoScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return MemoEditScreen(classifierService: widget.classifierService);
+          return MemoEditScreen(
+            classifierService: widget.classifierService,
+            initialScheduledAt: widget.date,
+          );
         },
       ),
     );
@@ -132,6 +134,7 @@ class _MemoScreenState extends State<MemoScreen> {
           return MemoEditScreen(
             memo: memo,
             classifierService: widget.classifierService,
+            initialScheduledAt: widget.date,
           );
         },
       ),
@@ -199,30 +202,6 @@ class _MemoScreenState extends State<MemoScreen> {
     await _loadMemos();
   }
 
-  void _setScheduledOnly(bool value) {
-    setState(() {
-      _scheduledOnly = value;
-    });
-
-    _loadMemos();
-  }
-
-  Future<void> _openCalendarScreen() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return CalendarScreen(
-            onToggleTheme: widget.onToggleTheme,
-            classifierService: widget.classifierService,
-          );
-        },
-      ),
-    );
-
-    await _loadCategories();
-    await _loadMemos();
-  }
-
   Future<void> _showFilterCategorySheet() async {
     final selectedId = await showModalBottomSheet<int>(
       context: context,
@@ -233,9 +212,6 @@ class _MemoScreenState extends State<MemoScreen> {
           onAdd: _addCategory,
           onEdit: _editCategory,
           onDelete: _deleteCategory,
-          scheduledOnly: _scheduledOnly,
-          onScheduledChanged: _setScheduledOnly,
-          showScheduledOption: true,
         );
       },
     );
@@ -275,25 +251,12 @@ class _MemoScreenState extends State<MemoScreen> {
       ),
 
       body: _buildBody(),
-
-      onToggleTheme: widget.onToggleTheme,
-      classifierService: widget.classifierService,
-
       floatingActionButton: FloatingActionButton(
         onPressed: _openCreateScreen,
         child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: _openCalendarScreen,
-              tooltip: 'メモ一覧',
-              icon: Icon(Icons.calendar_month),
-            ),
-          ],
-        ),
-      ),
+      onToggleTheme: widget.onToggleTheme,
+      classifierService: widget.classifierService,
     );
   }
 
@@ -304,6 +267,17 @@ class _MemoScreenState extends State<MemoScreen> {
 
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${widget.date.year}年${widget.date.month}月${widget.date.day}日',
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
         // カテゴリ絞り込み
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

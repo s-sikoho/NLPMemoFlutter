@@ -61,6 +61,7 @@ class MemoRepository {
     int? categoryId,
     String? keyword,
     bool scheduledOnly = false,
+    DateTime? date,
   }) async {
     final db = await AppDatabase.instance.database;
     final whereParts = <String>[];
@@ -77,11 +78,18 @@ class MemoRepository {
     if (scheduledOnly) {
       whereParts.add('scheduled_at IS NOT NULL');
     }
+    if (date != null) {
+      final start = DateTime(date.year, date.month, date.day);
+      final end = start.add(const Duration(days: 1));
+      whereParts.add('scheduled_at >= ? AND scheduled_at < ?');
+      whereArgs.add(start.millisecondsSinceEpoch);
+      whereArgs.add(end.millisecondsSinceEpoch);
+    }
     final maps = await db.query(
       'memos',
       where: whereParts.isEmpty ? null : whereParts.join(' AND '),
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
-      orderBy: scheduledOnly ? 'scheduled_at ASC' : 'id DESC',
+      orderBy: (scheduledOnly || date != null) ? 'scheduled_at ASC' : 'id DESC',
     );
     return maps.map((map) => Memo.fromMap(map)).toList();
   }

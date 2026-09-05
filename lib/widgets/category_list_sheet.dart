@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/category.dart';
+
 class CategoryListSheet extends StatefulWidget {
   final List<Category> categories;
 
@@ -26,9 +27,9 @@ class CategoryListSheet extends StatefulWidget {
   });
 
   @override
-  State<CategoryListSheet> createState() =>
-      _CategoryListSheetState();
+  State<CategoryListSheet> createState() => _CategoryListSheetState();
 }
+
 class _CategoryListSheetState extends State<CategoryListSheet> {
   late bool _scheduledOnly;
 
@@ -51,87 +52,97 @@ class _CategoryListSheetState extends State<CategoryListSheet> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-
-          if (widget.showAllOption)
-            ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('すべて'),
-              onTap: () {
-                Navigator.of(context).pop(-1);
-              },
-            ),
-
-          if (widget.showScheduledOption)
-            SwitchListTile(
-              secondary: const Icon(Icons.calendar_month),
-              title: const Text('日時付きのみ'),
-              value: _scheduledOnly,
-              onChanged: (value) {
-                setState(() {
-                  _scheduledOnly = value;
-                });
-
-                widget.onScheduledChanged?.call(value);
-              },
-            ),
-            ...widget.categories.where((category) => !category.isOther).map((category) {
-            return ListTile(
-              leading: CircleAvatar(
-                radius: 8,
-                backgroundColor: Color(category.color),
-              ),
-              title: Text(category.name),
-              // 普通のカテゴリを選んだ場合
-              onTap: () {
-                Navigator.of(context).pop(category.id);
-              },
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    tooltip: '編集',
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-
-                      await widget.onEdit(category);
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                if (widget.showAllOption)
+                  ListTile(
+                    leading: const Icon(Icons.list),
+                    title: const Text('すべて'),
+                    onTap: () {
+                      Navigator.of(context).pop(-1);
                     },
                   ),
-                  if (!category.isOther)
-                    IconButton(
-                      tooltip: '削除',
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () async {
-                        Navigator.of(context).pop();
 
-                        await widget.onDelete(category);
+                if (widget.showScheduledOption)
+                  SwitchListTile(
+                    secondary: const Icon(Icons.calendar_month),
+                    title: const Text('日時付きのみ'),
+                    value: _scheduledOnly,
+                    onChanged: (value) {
+                      setState(() {
+                        _scheduledOnly = value;
+                      });
+
+                      widget.onScheduledChanged?.call(value);
+                    },
+                  ),
+                ...widget.categories.where((category) => !category.isOther).map(
+                  (category) {
+                    return ListTile(
+                      leading: CircleAvatar(
+                        radius: 8,
+                        backgroundColor: Color(category.color),
+                      ),
+                      title: Text(category.name),
+                      // 普通のカテゴリを選んだ場合
+                      onTap: () {
+                        Navigator.of(context).pop(category.id);
                       },
-                    ),
-                ],
-              ),
-            );
-          }),
-          const Divider(),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: '編集',
+                            icon: const Icon(Icons.edit_outlined),
+                            onPressed: () async {
+                              Navigator.of(context).pop();
 
-          ...widget.categories.where((category) => category.isOther).map((category) {
-            return ListTile(
-              leading: CircleAvatar(
-                radius: 8,
-                backgroundColor: Color(category.color),
-              ),
-              title: Text(category.name),
-              onTap: () {
-                Navigator.of(context).pop(category.id);
-              },
-            );
-          }),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('カテゴリを追加'),
-            onTap: () async {
-              Navigator.of(context).pop();
-              await widget.onAdd();
-            },
+                              await widget.onEdit(category);
+                            },
+                          ),
+                          if (!category.isOther)
+                            IconButton(
+                              tooltip: '削除',
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+
+                                await widget.onDelete(category);
+                              },
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                const Divider(),
+
+                ...widget.categories.where((category) => category.isOther).map((
+                  category,
+                ) {
+                  return ListTile(
+                    leading: CircleAvatar(
+                      radius: 8,
+                      backgroundColor: Color(category.color),
+                    ),
+                    title: Text(category.name),
+                    onTap: () {
+                      Navigator.of(context).pop(category.id);
+                    },
+                  );
+                }),
+                ListTile(
+                  leading: const Icon(Icons.add),
+                  title: const Text('カテゴリを追加'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await widget.onAdd();
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),

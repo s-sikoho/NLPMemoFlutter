@@ -27,6 +27,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   final MemoRepository _memoRepository = MemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
+  DateTime _focusedMonth = DateTime.now();
   List<Memo> _memos = [];
   List<Category> _categories = [];
   bool _isLoading = true;
@@ -47,13 +48,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _loadInitialData() async {
     final categories = await _categoryRepository.getAllCategories();
-
     final memos = await _memoRepository.getFilteredMemos(scheduledOnly: true);
-
     if (!mounted) {
       return;
     }
-
     setState(() {
       _categories = categories;
       _memos = memos;
@@ -83,24 +81,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Map<DateTime, List<Memo>> _groupMemosByDate() {
     final result = <DateTime, List<Memo>>{};
-
     for (final memo in _memos) {
       final scheduledAt = memo.scheduledAt;
 
       if (scheduledAt == null) {
         continue;
       }
-
       final date = DateTime(
         scheduledAt.year,
         scheduledAt.month,
         scheduledAt.day,
       );
-
       result.putIfAbsent(date, () => []);
       result[date]!.add(memo);
     }
-
     return result;
   }
 
@@ -112,16 +106,51 @@ class _CalendarScreenState extends State<CalendarScreen> {
     Navigator.of(context).pop();
   }
 
+  void _goPreviousMonth() {
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+    });
+  }
+
+  void _goNextMonth() {
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MainScaffold(
       title: const Text('カレンダー'),
+      body: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: _goPreviousMonth,
+                icon: const Icon(Icons.chevron_left),
+              ),
+              Text(
+                '${_focusedMonth.year}年${_focusedMonth.month}月',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                onPressed: _goNextMonth,
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
+          ),
+          Expanded(child: _buildCalendar()),
+        ],
+      ),
 
-      body: _buildCalendar(),
       onToggleTheme: widget.onToggleTheme,
       classifierService: widget.classifierService,
       onCreateMemo: _openCreateScreen,
-
       isCalendarScreen: true,
       onSwitchScreen: _backToMemoScreen,
     );
@@ -129,10 +158,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildCalendar() {
     final groupedMemos = _groupMemosByDate();
-    final now = DateTime.now();
-    final firstDayOfMonth = DateTime(now.year, now.month, 1);
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final firstWeekday = firstDayOfMonth.weekday%7;
+    final firstDayOfMonth = DateTime(
+      _focusedMonth.year,
+      _focusedMonth.month,
+      1,
+    );
+    final daysInMonth = DateTime(
+      _focusedMonth.year,
+      _focusedMonth.month + 1,
+      0,
+    ).day;
+    final firstWeekday = firstDayOfMonth.weekday % 7;
     final totalCells = firstWeekday - 1 + daysInMonth;
 
     return Column(
@@ -150,7 +186,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               if (day <= 0) {
                 return const SizedBox();
               }
-              final date = DateTime(now.year, now.month, day);
+              final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
               final memos = groupedMemos[date] ?? [];
               return _buildDayCell(date, memos);
             },
@@ -199,7 +235,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildWeekdayHeader() {
-    const weekdays = ['日','月', '火', '水', '木', '金', '土'];
+    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
     return Row(
       children: weekdays.map((day) {
         return Expanded(

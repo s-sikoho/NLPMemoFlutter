@@ -98,10 +98,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return result;
   }
 
-  void _openCreateScreen() {
-    // 今は未実装
-  }
-
   void _backToMemoScreen() {
     Navigator.of(context).pop();
   }
@@ -120,6 +116,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return MainScaffold(
       title: const Text('カレンダー'),
       body: Column(
@@ -150,9 +149,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
       onToggleTheme: widget.onToggleTheme,
       classifierService: widget.classifierService,
-      onCreateMemo: _openCreateScreen,
       isCalendarScreen: true,
-      onSwitchScreen: _backToMemoScreen,
     );
   }
 

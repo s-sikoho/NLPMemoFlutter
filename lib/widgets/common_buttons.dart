@@ -10,8 +10,8 @@ class MainScaffold extends StatelessWidget {
 
   final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
-  final VoidCallback onCreateMemo;
-  final VoidCallback onSwitchScreen;
+  final Widget? floatingActionButton;
+  final Widget? bottomNavigationBar;
 
   final bool isCalendarScreen;
 
@@ -21,8 +21,8 @@ class MainScaffold extends StatelessWidget {
     required this.body,
     required this.onToggleTheme,
     required this.classifierService,
-    required this.onCreateMemo,
-    required this.onSwitchScreen,
+    this.floatingActionButton,
+    this.bottomNavigationBar,
     required this.isCalendarScreen,
   });
 
@@ -42,24 +42,15 @@ class MainScaffold extends StatelessWidget {
         ],
       ),
 
-      body: body,
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: onCreateMemo,
-        child: const Icon(Icons.add),
+      body: Stack(
+        children: [
+          Positioned.fill(child: body),
+          if (bottomNavigationBar != null)
+            Positioned(left: 16, bottom: 16, child: bottomNavigationBar!),
+        ],
       ),
 
-      bottomNavigationBar: SafeArea(
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: onSwitchScreen,
-              tooltip: isCalendarScreen ? 'メモ一覧' : 'カレンダー',
-              icon: Icon(isCalendarScreen ? Icons.notes : Icons.calendar_month),
-            ),
-          ],
-        ),
-      ),
+      floatingActionButton: floatingActionButton,
     );
   }
 }

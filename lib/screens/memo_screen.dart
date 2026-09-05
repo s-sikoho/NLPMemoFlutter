@@ -279,10 +279,22 @@ class _MemoScreenState extends State<MemoScreen> {
       onToggleTheme: widget.onToggleTheme,
       classifierService: widget.classifierService,
 
-      onCreateMemo: _openCreateScreen,
-
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openCreateScreen,
+        child: const Icon(Icons.add),
+      ),
       isCalendarScreen: false,
-      onSwitchScreen: _openCalendarScreen,
+      bottomNavigationBar: SafeArea(
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: _openCalendarScreen,
+              tooltip: 'メモ一覧',
+              icon: Icon(Icons.calendar_month),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -32,6 +32,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   final MemoRepository _memoRepository = MemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
+  DateTime _selectedDate = DateTime.now();
   DateTime _focusedMonth = DateTime.now();
   List<Memo> _memos = [];
   List<Category> _categories = [];
@@ -103,6 +104,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return result;
   }
 
+  List<Memo> _getSelectedDateMemos() {
+    return _memos.where((memo) {
+      final scheduledAt = memo.scheduledAt;
+
+      if (scheduledAt == null) {
+        return false;
+      }
+
+      return scheduledAt.year == _selectedDate.year &&
+          scheduledAt.month == _selectedDate.month &&
+          scheduledAt.day == _selectedDate.day;
+    }).toList();
+  }
+
   Future<void> _openDayScreen(DateTime date) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -127,14 +142,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _goPreviousMonth() {
+    final newMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
     setState(() {
-      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
+      _focusedMonth = newMonth;
+      _selectedDate = newMonth;
     });
   }
 
   void _goNextMonth() {
+    final newMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
     setState(() {
-      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
+      _focusedMonth = newMonth;
+      _selectedDate = newMonth;
+    });
+  }
+
+  void _goToday() {
+    final now = DateTime.now();
+    setState(() {
+      _focusedMonth = DateTime(now.year, now.month);
+      _selectedDate = DateTime(now.year, now.month, now.day);
     });
   }
 
@@ -143,34 +170,64 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     return MainScaffold(
       title: const Text('カレンダー'),
-      body: Column(
+
+      body: Stack(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
             children: [
-              IconButton(
-                onPressed: _goPreviousMonth,
-                icon: const Icon(Icons.chevron_left),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: _goPreviousMonth,
+                    icon: const Icon(Icons.chevron_left),
+                  ),
+                  Text(
+                    '${_focusedMonth.year}年${_focusedMonth.month}月',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _goNextMonth,
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ],
               ),
-              Text(
-                '${_focusedMonth.year}年${_focusedMonth.month}月',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                onPressed: _goNextMonth,
-                icon: const Icon(Icons.chevron_right),
-              ),
+              _buildCalendar(),
+              const Divider(),
+              _buildSelectedDateHeader(),
+              Expanded(child: _buildSelectedMemoList()),
             ],
           ),
-          Expanded(child: _buildCalendar()),
+          Positioned(
+            left: 16,
+            bottom: 16,
+            child: FloatingActionButton.extended(
+              heroTag: 'todayButton',
+              onPressed: _goToday,
+              icon: const Icon(Icons.today),
+              label: const Text('今日'),
+            ),
+          ),
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: FloatingActionButton.extended(
+              heroTag: 'detailButton',
+              onPressed: () {
+                _openDayScreen(_selectedDate);
+              },
+              icon: const Icon(Icons.open_in_new),
+              label: const Text('詳細'),
+            ),
+          ),
         ],
       ),
-
       onToggleTheme: widget.onToggleTheme,
       classifierService: widget.classifierService,
     );
@@ -194,26 +251,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
       children: [
         _buildWeekdayHeader(),
         const SizedBox(height: 8),
-        Expanded(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-            ),
-            itemCount: totalCells,
-            itemBuilder: (context, index) {
-              final day = index - firstWeekday + 1;
-              if (day <= 0) {
-                return const SizedBox();
-              }
-              final date = DateTime(
-                _focusedMonth.year,
-                _focusedMonth.month,
-                day,
-              );
-              final memos = groupedMemos[date] ?? [];
-              return _buildDayCell(date, memos);
-            },
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
           ),
+          itemCount: totalCells,
+          itemBuilder: (context, index) {
+            final day = index - firstWeekday + 1;
+            if (day <= 0) {
+              return const SizedBox();
+            }
+            final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
+            final memos = groupedMemos[date] ?? [];
+            return _buildDayCell(date, memos);
+          },
         ),
       ],
     );
@@ -222,8 +275,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _buildDayCell(DateTime date, List<Memo> memos) {
     final now = DateTime.now();
 
-    final isToday =
-        date.year == now.year && date.month == now.month && date.day == now.day;
+    final isSelected =
+        date.year == _selectedDate.year &&
+        date.month == _selectedDate.month &&
+        date.day == _selectedDate.day;
 
     Color? dayColor;
 
@@ -246,7 +301,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final visibleColors = colors.take(3).toList();
     return InkWell(
       onTap: () {
-        _openDayScreen(date);
+        setState(() {
+          _selectedDate = date;
+        });
       },
       child: Stack(
         children: [
@@ -259,14 +316,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   height: 30,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isToday ? Colors.blue : Colors.transparent,
+                    color: isSelected ? Colors.blue : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   child: Text(
                     '${date.day}',
                     style: TextStyle(
-                      color: isToday ? Colors.white : dayColor,
-                      fontWeight: isToday ? FontWeight.w900 : FontWeight.normal,
+                      color: isSelected ? Colors.white : dayColor,
+                      fontWeight: isSelected
+                          ? FontWeight.w900
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -289,6 +348,60 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSelectedDateHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          '${_selectedDate.month}月${_selectedDate.day}日',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedMemoList() {
+    final memos = _getSelectedDateMemos();
+
+    if (memos.isEmpty) {
+      return const Center(child: Text('この日のメモはありません'));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
+      itemCount: memos.length,
+      itemBuilder: (context, index) {
+        final memo = memos[index];
+
+        return _buildSelectedMemoCard(memo);
+      },
+    );
+  }
+
+  Widget _buildSelectedMemoCard(Memo memo) {
+    final category = _getCategory(memo.categoryId);
+
+    final color = category == null || category.isOther
+        ? Colors.grey
+        : Color(category.color);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        title: Text(memo.title),
+        subtitle: memo.content.isNotEmpty
+            ? Text(memo.content, maxLines: 2, overflow: TextOverflow.ellipsis)
+            : null,
       ),
     );
   }

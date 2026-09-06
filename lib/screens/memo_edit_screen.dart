@@ -9,6 +9,7 @@ import '../repositories/category_repository.dart';
 import '../services/memo_save_service.dart';
 import '../services/category_delete_service.dart';
 import '../services/classifier_service.dart';
+import '../services/notification_service.dart';
 
 import '../widgets/category_selector.dart';
 import '../widgets/category_list_sheet.dart';
@@ -20,18 +21,20 @@ class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
   final ClassifierService classifierService;
   final DateTime? initialScheduledAt;
+  final NotificationService notificationService;
   const MemoEditScreen({
     super.key,
     this.memo,
     required this.classifierService,
     this.initialScheduledAt,
+    required this.notificationService,
   });
   @override
   State<MemoEditScreen> createState() => _MemoEditScreenState();
 }
 
 class _MemoEditScreenState extends State<MemoEditScreen> {
-  final MemoSaveService _memoSaveService = MemoSaveService();
+  late final MemoSaveService _memoSaveService;
   final CategoryRepository _categoryRepository = CategoryRepository();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
@@ -59,6 +62,9 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   @override
   void initState() {
     super.initState();
+    _memoSaveService = MemoSaveService(
+      notificationService: widget.notificationService,
+    );
     final memo = widget.memo;
     if (memo != null) {
       _titleController.text = memo.title;
@@ -340,8 +346,15 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
     });
   }
 
-  void _setNotificationEnabled(bool value) {
+  void _setNotificationEnabled(bool value) async {
     if (_scheduledAt == null) {
+      return;
+    }
+    if (value) {
+      await widget.notificationService.requestPermission();
+    }
+
+    if (!mounted) {
       return;
     }
     setState(() {

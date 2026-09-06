@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/classifier_service.dart';
+import '../services/notification_service.dart';
 
 import '../widgets/common_buttons.dart';
 
@@ -15,11 +16,13 @@ import 'day_screen.dart';
 class CalendarScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
+  final NotificationService notificationService;
 
   const CalendarScreen({
     super.key,
     required this.onToggleTheme,
     required this.classifierService,
+    required this.notificationService,
   });
 
   @override
@@ -108,6 +111,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             date: date,
             onToggleTheme: widget.onToggleTheme,
             classifierService: widget.classifierService,
+            notificationService: widget.notificationService,
           );
         },
       ),

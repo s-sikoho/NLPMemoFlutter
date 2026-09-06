@@ -19,13 +19,18 @@ import '../widgets/common_buttons.dart';
 import 'memo_edit_screen.dart';
 import 'calendar_screen.dart';
 
+import '../services/memo_delete_service.dart';
+import '../services/notification_service.dart';
+
 class MemoScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
+  final NotificationService notificationService;
   const MemoScreen({
     super.key,
     required this.classifierService,
     required this.onToggleTheme,
+    required this.notificationService,
   });
 
   @override
@@ -34,6 +39,7 @@ class MemoScreen extends StatefulWidget {
 
 class _MemoScreenState extends State<MemoScreen> {
   final MemoRepository _memoRepository = MemoRepository();
+  late final MemoDeleteService _memoDeleteService;
   final CategoryRepository _categoryRepository = CategoryRepository();
   final CategoryDeleteService _categoryDeleteService = CategoryDeleteService();
   final _categoryColors = <Color>[
@@ -68,6 +74,9 @@ class _MemoScreenState extends State<MemoScreen> {
   @override
   void initState() {
     super.initState();
+    _memoDeleteService = MemoDeleteService(
+      notificationService: widget.notificationService,
+    );
     _loadInitialData();
   }
 
@@ -117,7 +126,7 @@ class _MemoScreenState extends State<MemoScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return MemoEditScreen(classifierService: widget.classifierService);
+          return MemoEditScreen(classifierService: widget.classifierService,notificationService: widget.notificationService,);
         },
       ),
     );
@@ -132,6 +141,7 @@ class _MemoScreenState extends State<MemoScreen> {
           return MemoEditScreen(
             memo: memo,
             classifierService: widget.classifierService,
+            notificationService: widget.notificationService,
           );
         },
       ),
@@ -141,10 +151,7 @@ class _MemoScreenState extends State<MemoScreen> {
   }
 
   Future<void> _deleteMemo(Memo memo) async {
-    if (memo.id == null) {
-      return;
-    }
-    await _memoRepository.deleteMemo(memo.id!);
+    await _memoDeleteService.deleteMemo(memo);
     await _loadMemos();
   }
 
@@ -214,6 +221,7 @@ class _MemoScreenState extends State<MemoScreen> {
           return CalendarScreen(
             onToggleTheme: widget.onToggleTheme,
             classifierService: widget.classifierService,
+            notificationService: widget.notificationService,
           );
         },
       ),

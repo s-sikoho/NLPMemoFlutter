@@ -47,31 +47,45 @@ class NotificationService {
   }
 
   Future<void> scheduleMemoNotification(Memo memo) async {
+    final id = memo.id;
     final scheduledAt = memo.scheduledAt;
-    if (memo.id == null || scheduledAt == null || !memo.notificationEnabled) {
+
+    if (id == null || scheduledAt == null || !memo.notificationEnabled) {
       return;
     }
-    // ここで scheduledAt を使って予約通知を登録
-  }
-
-  Future<void> scheduleTestNotification() async {
+    // 過去の日時には予約しない
+    if (!scheduledAt.isAfter(DateTime.now())) {
+      return;
+    }
+    final scheduledDate = tz.TZDateTime(
+      tz.local,
+      scheduledAt.year,
+      scheduledAt.month,
+      scheduledAt.day,
+      scheduledAt.hour,
+      scheduledAt.minute,
+    );
     await _plugin.zonedSchedule(
-      id: 100,
-      title: '予約通知テスト',
-      body: '10秒前に予約した通知です',
-      scheduledDate: tz.TZDateTime.now(tz.local)
-          .add(const Duration(seconds: 10)),
+      id: id,
+      title: memo.title.isEmpty ? 'メモ' : memo.title,
+      body: memo.content.isEmpty ? '予定の時刻になりました' : memo.content,
+      scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'memo_schedule_channel',
           'Memo Schedule',
-          channelDescription: 'メモの日時通知',
+          channelDescription: '日時付きメモの通知',
           importance: Importance.high,
           priority: Priority.high,
         ),
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      payload: id.toString(),
     );
+  }
+
+  Future<void> cancelMemoNotification(int memoId) async {
+    await _plugin.cancel(id: memoId);
   }
 }

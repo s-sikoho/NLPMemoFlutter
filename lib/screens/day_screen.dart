@@ -8,6 +8,8 @@ import '../repositories/category_repository.dart';
 
 import '../services/classifier_service.dart';
 import '../services/category_delete_service.dart';
+import '../services/memo_delete_service.dart';
+import '../services/notification_service.dart';
 
 import '../widgets/memo_card.dart';
 import '../widgets/category_add_dialog.dart';
@@ -22,11 +24,13 @@ class DayScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
   final ClassifierService classifierService;
   final DateTime date;
+  final NotificationService notificationService;
   const DayScreen({
     super.key,
     required this.classifierService,
     required this.onToggleTheme,
     required this.date,
+    required this.notificationService,
   });
 
   @override
@@ -34,6 +38,7 @@ class DayScreen extends StatefulWidget {
 }
 
 class _DayScreenState extends State<DayScreen> {
+  late final MemoDeleteService _memoDeleteService;
   final MemoRepository _memoRepository = MemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
   final CategoryDeleteService _categoryDeleteService = CategoryDeleteService();
@@ -66,6 +71,9 @@ class _DayScreenState extends State<DayScreen> {
 
   @override
   void initState() {
+    _memoDeleteService = MemoDeleteService(
+      notificationService: widget.notificationService,
+    );
     super.initState();
     _loadInitialData();
   }
@@ -119,6 +127,7 @@ class _DayScreenState extends State<DayScreen> {
           return MemoEditScreen(
             classifierService: widget.classifierService,
             initialScheduledAt: widget.date,
+            notificationService: widget.notificationService,
           );
         },
       ),
@@ -135,6 +144,7 @@ class _DayScreenState extends State<DayScreen> {
             memo: memo,
             classifierService: widget.classifierService,
             initialScheduledAt: widget.date,
+            notificationService: widget.notificationService,
           );
         },
       ),
@@ -144,10 +154,7 @@ class _DayScreenState extends State<DayScreen> {
   }
 
   Future<void> _deleteMemo(Memo memo) async {
-    if (memo.id == null) {
-      return;
-    }
-    await _memoRepository.deleteMemo(memo.id!);
+    await _memoDeleteService.deleteMemo(memo);
     await _loadMemos();
   }
 

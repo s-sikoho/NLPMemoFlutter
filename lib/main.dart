@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 import 'screens/memo_screen.dart';
 import 'services/classifier_service.dart';
@@ -51,6 +52,7 @@ class _MyAppState extends State<MyApp> {
       home: MemoScreen(
         classifierService: widget.classifierService,
         onToggleTheme: _toggleTheme,
+        notificationService: widget.notificationService,
       ),
     );
   }

@@ -126,7 +126,10 @@ class _MemoScreenState extends State<MemoScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return MemoEditScreen(classifierService: widget.classifierService,notificationService: widget.notificationService,);
+          return MemoEditScreen(
+            classifierService: widget.classifierService,
+            notificationService: widget.notificationService,
+          );
         },
       ),
     );
@@ -215,6 +218,7 @@ class _MemoScreenState extends State<MemoScreen> {
   }
 
   Future<void> _openCalendarScreen() async {
+    FocusScope.of(context).unfocus();
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
@@ -226,7 +230,9 @@ class _MemoScreenState extends State<MemoScreen> {
         },
       ),
     );
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).unfocus();
+    });
     await _loadCategories();
     await _loadMemos();
   }

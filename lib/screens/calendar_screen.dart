@@ -223,7 +223,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 _openDayScreen(_selectedDate);
               },
               icon: const Icon(Icons.open_in_new),
-              label: const Text('詳細'),
+              label: const Text('この日のメモ'),
             ),
           ),
         ],

@@ -1,0 +1,11 @@
+multilingual-e5-small
+
+Source:
+Hugging Face - intfloat/multilingual-e5-small
+
+License:
+MIT
+
+This model is distributed under the MIT License.
+
+https://opensource.org/license/mit

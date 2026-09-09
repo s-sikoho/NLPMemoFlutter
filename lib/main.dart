@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 
 import 'screens/memo_screen.dart';
 import 'services/classifier_service.dart';
 import 'services/notification_service.dart';
+import 'license/license_registry.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerAdditionalLicenses();
   final classifierService = ClassifierService();
   await classifierService.initialize();
-
   final notificationService = NotificationService();
   await notificationService.initialize();
   runApp(

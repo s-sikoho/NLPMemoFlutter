@@ -31,7 +31,7 @@ class MainScaffold extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              showLicensePage(context: context, applicationName: 'NLPMemoFlutter');
+              showLicensePage(context: context, applicationName: 'SortMemo');
             },
             tooltip: 'オープンソースライセンス',
             icon: const Icon(Icons.info_outline),

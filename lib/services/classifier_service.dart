@@ -31,12 +31,6 @@ class ClassifierService {
     await initTokenizer(tokenizerJson: data.buffer.asUint8List());
 
     await _initializeOnnx();
-
-    final hasEmbedding = await _categoryEmbeddingRepository.existsAny();
-
-    if (!hasEmbedding) {
-      await train();
-    }
   }
 
   Future<void> _initializeOnnx() async {
@@ -82,14 +76,31 @@ class ClassifierService {
     // 1. categoryId ごとに文章をまとめる
     final textsByCategory = <int, List<String>>{};
 
-    // 2. 学習専用データを取得
+    // 2. カテゴリ取得
     final categories = await _categoryRepository.getAllCategories();
+
+    // 再学習が必要なカテゴリだけ抽出
+    final targetCategories = categories
+        .where((category) => category.id != null && category.needsTraining)
+        .toList();
+
+    final targetCategoryIds = targetCategories
+        .map((category) => category.id!)
+        .toSet();
+
+    // 再学習対象がなければ終了
+    if (targetCategoryIds.isEmpty) {
+      return;
+    }
+
+    // 3. プリセット学習データを取得
     final presets = await _presetCategoryService.loadPresets();
 
-    for (final category in categories) {
+    for (final category in targetCategories) {
       if (category.presetId == null) {
         continue;
       }
+
       for (final preset in presets) {
         if (preset.presetId == category.presetId) {
           for (final memo in preset.trainingMemos) {
@@ -97,32 +108,41 @@ class ClassifierService {
                 .putIfAbsent(category.id!, () => [])
                 .add('${memo.title} ${memo.content}');
           }
+
           break;
         }
       }
     }
 
-    // 3. ユーザーのメモのうち、学習に使ってよいものを取得(いったん全て取得にしておく)
+    // 4. ユーザーのメモを取得
     final confirmedMemos = await _memoRepository.getAllMemos();
 
     for (final memo in confirmedMemos) {
+      // 再学習対象カテゴリ以外は無視
+      if (!targetCategoryIds.contains(memo.categoryId)) {
+        continue;
+      }
+
       textsByCategory
           .putIfAbsent(memo.categoryId, () => [])
           .add('${memo.title} ${memo.content}');
     }
 
-    // 4. 各カテゴリについて代表 embedding を作る
-    for (final entry in textsByCategory.entries) {
-      final categoryId = entry.key;
-      final texts = entry.value;
+    // 5. 各カテゴリについて代表 embedding を作る
+    for (final category in targetCategories) {
+      final categoryId = category.id!;
+
+      final texts = textsByCategory[categoryId] ?? [];
 
       if (texts.isEmpty) {
+        await _categoryEmbeddingRepository.deleteByCategoryId(categoryId);
+        await _categoryRepository.markTrainingCompleted(categoryId);
         continue;
       }
 
       final embeddings = <List<double>>[];
 
-      // 5. 各教師文章を embedding 化
+      // 6. 各教師文章を embedding 化
       for (final text in texts) {
         final tokenized = await tokenize(text: 'passage: $text');
 
@@ -134,19 +154,22 @@ class ClassifierService {
         embeddings.add(embedding);
       }
 
-      // 6. embedding の平均を取る
+      // 7. embedding の平均
       final representativeEmbedding = _averageEmbeddings(embeddings);
 
-      // 7. 平均後にもう一度 normalize
+      // 8. normalize
       final normalizedEmbedding = l2Normalize(representativeEmbedding);
 
-      // 8. SQLite にカテゴリ代表 embedding を保存
+      // 9. embedding保存
       await _categoryEmbeddingRepository.save(
         CategoryEmbedding(
           categoryId: categoryId,
           embedding: normalizedEmbedding,
         ),
       );
+
+      // 10. このカテゴリの学習完了
+      await _categoryRepository.markTrainingCompleted(categoryId);
     }
   }
 

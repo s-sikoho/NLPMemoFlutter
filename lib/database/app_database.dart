@@ -36,7 +36,8 @@ class AppDatabase {
         name TEXT NOT NULL,
         is_other INTEGER NOT NULL,
         color INTEGER NOT NULL,
-        preset_id TEXT
+        preset_id TEXT,
+        needs_training INTEGER NOT NULL DEFAULT 1
       )
     ''');
 

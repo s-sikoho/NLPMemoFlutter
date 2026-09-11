@@ -25,6 +25,7 @@ class CategoryRepository {
     }
     return Category.fromMap(maps.first);
   }
+
   Future<int> updateCategory(Category category) async {
     final db = await _appDatabase.database;
 
@@ -73,5 +74,27 @@ class CategoryRepository {
     final db = await AppDatabase.instance.database;
 
     return db.delete('categories', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> markNeedsTraining(int categoryId) async {
+    final db = await _appDatabase.database;
+
+    await db.update(
+      'categories',
+      {'needs_training': 1},
+      where: 'id = ?',
+      whereArgs: [categoryId],
+    );
+  }
+
+  Future<void> markTrainingCompleted(int categoryId) async {
+    final db = await _appDatabase.database;
+
+    await db.update(
+      'categories',
+      {'needs_training': 0},
+      where: 'id = ?',
+      whereArgs: [categoryId],
+    );
   }
 }

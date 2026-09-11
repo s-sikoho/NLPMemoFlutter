@@ -7,9 +7,7 @@ class MemoSaveService {
   final MemoRepository _memoRepository = MemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
   final NotificationService notificationService;
-  MemoSaveService({
-    required this.notificationService,
-  });
+  MemoSaveService({required this.notificationService});
 
   Future<int> insertMemo(Memo memo) async {
     final category = await _categoryRepository.getCategoryById(memo.categoryId);
@@ -23,6 +21,8 @@ class MemoSaveService {
     }
 
     final id = await _memoRepository.insertMemo(memo);
+
+    await _categoryRepository.markNeedsTraining(memo.categoryId);
 
     if (memo.notificationEnabled && memo.scheduledAt != null) {
       final savedMemo = await _memoRepository.getMemoById(id);
@@ -49,7 +49,22 @@ class MemoSaveService {
       throw StateError('通知を有効にする場合は日時が必要です');
     }
 
+    // 更新前のメモを取得
+    final oldMemo = await _memoRepository.getMemoById(memo.id!);
+
+    if (oldMemo == null) {
+      throw StateError('更新対象のメモが存在しません');
+    }
+
     await _memoRepository.updateMemo(memo);
+
+    // 更新後のカテゴリ
+    await _categoryRepository.markNeedsTraining(memo.categoryId);
+
+    // カテゴリが変更された場合は変更前も対象
+    if (oldMemo.categoryId != memo.categoryId) {
+      await _categoryRepository.markNeedsTraining(oldMemo.categoryId);
+    }
 
     await notificationService.cancelMemoNotification(memo.id!);
 

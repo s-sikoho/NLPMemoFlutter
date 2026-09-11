@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/train_button.dart';
+import '../widgets/train_menu_button.dart';
 
 import '../services/classifier_service.dart';
 
@@ -43,7 +43,7 @@ class MainScaffold extends StatelessWidget {
             icon: const Icon(Icons.dark_mode),
           ),
 
-          TrainButton(classifierService: classifierService),
+          TrainMenuButton(classifierService: classifierService),
         ],
       ),
 

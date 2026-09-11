@@ -1,8 +1,9 @@
 import 'package:flutter/services.dart';
+import 'package:nlpmemoflutter/repositories/category_repository.dart';
+import 'package:nlpmemoflutter/services/preset_category_service.dart';
 
 import '../repositories/category_embedding_repository.dart';
 import '../repositories/memo_repository.dart';
-import '../repositories/training_memo_repository.dart';
 import '../models/category_embedding.dart';
 
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
@@ -16,8 +17,9 @@ class ClassifierService {
   OrtSession? _session;
   final CategoryEmbeddingRepository _categoryEmbeddingRepository =
       CategoryEmbeddingRepository();
-  final TrainingMemoRepository _trainingMemoRepository = TrainingMemoRepository();
   final MemoRepository _memoRepository = MemoRepository();
+  final CategoryRepository _categoryRepository = CategoryRepository();
+  final PresetCategoryService _presetCategoryService = PresetCategoryService();
 
   Future<void> initialize() async {
     await RustLib.init();
@@ -77,21 +79,31 @@ class ClassifierService {
   }
 
   Future<void> train() async {
-    // 1. 学習専用データを取得
-    final trainingMemos = await _trainingMemoRepository.getAllMemos();
-
-    // 2. ユーザーのメモのうち、
-    //    学習に使ってよいものを取得(いったん全て取得にしておく)
-    final confirmedMemos = await _memoRepository.getAllMemos();
-
-    // 3. categoryId ごとに文章をまとめる
+    // 1. categoryId ごとに文章をまとめる
     final textsByCategory = <int, List<String>>{};
 
-    for (final memo in trainingMemos) {
-      textsByCategory
-          .putIfAbsent(memo.categoryId, () => [])
-          .add('${memo.title} ${memo.content}');
+    // 2. 学習専用データを取得
+    final categories = await _categoryRepository.getAllCategories();
+    final presets = await _presetCategoryService.loadPresets();
+
+    for (final category in categories) {
+      if (category.presetId == null) {
+        continue;
+      }
+      for (final preset in presets) {
+        if (preset.presetId == category.presetId) {
+          for (final memo in preset.trainingMemos) {
+            textsByCategory
+                .putIfAbsent(category.id!, () => [])
+                .add('${memo.title} ${memo.content}');
+          }
+          break;
+        }
+      }
     }
+
+    // 3. ユーザーのメモのうち、学習に使ってよいものを取得(いったん全て取得にしておく)
+    final confirmedMemos = await _memoRepository.getAllMemos();
 
     for (final memo in confirmedMemos) {
       textsByCategory

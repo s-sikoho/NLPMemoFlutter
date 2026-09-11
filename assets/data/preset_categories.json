@@ -1,0 +1,83 @@
+[
+  {
+    "presetId": "university",
+    "name": "大学",
+    "color": 4294944000,
+    "trainingMemos": [
+      {
+        "title": "授業",
+        "content": "今日の講義内容を確認する"
+      },
+      {
+        "title": "出席",
+        "content": "明日の授業の出席時間を確認する"
+      },
+      {
+        "title": "サークル",
+        "content": "放課後にサークル活動へ参加する"
+      },
+      {
+        "title": "レポート",
+        "content": "授業のレポート課題を提出する"
+      },
+      {
+        "title": "試験",
+        "content": "来週の試験に向けて勉強する"
+      }
+    ]
+  },
+  {
+    "presetId": "life",
+    "name": "生活",
+    "color": 4294901760,
+    "trainingMemos": [
+      {
+        "title": "買い物",
+        "content": "スーパーで食材を買う"
+      },
+      {
+        "title": "掃除",
+        "content": "部屋を掃除する"
+      },
+      {
+        "title": "洗濯",
+        "content": "洗濯物を洗って干す"
+      },
+      {
+        "title": "料理",
+        "content": "夕食を作る"
+      },
+      {
+        "title": "予定",
+        "content": "今週の生活予定を確認する"
+      }
+    ]
+  },
+  {
+    "presetId": "programming",
+    "name": "プログラミング",
+    "color": 4288423856,
+    "trainingMemos": [
+      {
+        "title": "Flutter",
+        "content": "FlutterのWidgetについて調べる"
+      },
+      {
+        "title": "Git",
+        "content": "Gitでブランチを作成する"
+      },
+      {
+        "title": "デバッグ",
+        "content": "プログラムのエラー原因を調べる"
+      },
+      {
+        "title": "API",
+        "content": "APIとの通信処理を実装する"
+      },
+      {
+        "title": "データベース",
+        "content": "SQLiteのテーブル構造を変更する"
+      }
+    ]
+  }
+]

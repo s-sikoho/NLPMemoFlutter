@@ -81,7 +81,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/models/multilingual_e5_small/
-    - assets/data/default_training_data.json
+    - assets/data/preset_categories.json
     - assets/licenses/multilingual_e5_small_LICENSE.txt
     - assets/licenses/tokenizers_LICENSE.txt
     - assets/icon/app_icon.png

@@ -35,7 +35,8 @@ class AppDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         is_other INTEGER NOT NULL,
-        color INTEGER NOT NULL
+        color INTEGER NOT NULL,
+        preset_id TEXT
       )
     ''');
 
@@ -60,51 +61,11 @@ class AppDatabase {
       )
     ''');
 
-    await db.execute('''
-      CREATE TABLE training_memos(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        category_id INTEGER NOT NULL
-      )
-    ''');
-
     await db.insert("categories", {
       "id": 0,
       "name": "その他",
       "is_other": 1,
       "color": Colors.white.toARGB32(),
     });
-    await db.insert("categories", {
-      "id": 1,
-      "name": "大学",
-      "is_other": 0,
-      "color": Colors.orange.toARGB32(),
-    });
-    await db.insert("categories", {
-      "id": 2,
-      "name": "生活",
-      "is_other": 0,
-      "color": Colors.pink.toARGB32(),
-    });
-    await db.insert("categories", {
-      "id": 3,
-      "name": "情報",
-      "is_other": 0,
-      "color": Colors.purple.toARGB32(),
-    });
-
-    final jsonString = await rootBundle.loadString(
-      'assets/data/default_training_data.json',
-    );
-    final List<dynamic> data = jsonDecode(jsonString);
-
-    for (final item in data) {
-      await db.insert('training_memos', {
-        'title': item['title'],
-        'content': item['content'],
-        'category_id': item['categoryId'],
-      });
-    }
   }
 }

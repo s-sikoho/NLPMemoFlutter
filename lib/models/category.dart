@@ -3,8 +3,9 @@ class Category {
   final String name;
   final bool isOther;
   final int color;
+  final String? presetId;
 
-  const Category({this.id, required this.name, required this.isOther, required this.color,});
+  const Category({this.id, required this.name, required this.isOther, required this.color,this.presetId});
 
   factory Category.fromMap(Map<String, Object?> map) {
     return Category(
@@ -12,10 +13,11 @@ class Category {
       name: map["name"] as String,
       isOther: (map['is_other'] as int) == 1,
       color: map['color'] as int,
+      presetId: map['preset_id']as String?
     );
   }
 
   Map<String, Object?> toMap() {
-    return {"id": id, "name": name, 'is_other': isOther ? 1 : 0, 'color': color,};
+    return {"id": id, "name": name, 'is_other': isOther ? 1 : 0, 'color': color, 'preset_id':presetId};
   }
 }

@@ -12,6 +12,7 @@ class MainScaffold extends StatelessWidget {
   final ClassifierService classifierService;
   final Widget? floatingActionButton;
   final Widget? bottomNavigationBar;
+  final Future<void> Function()? onCategoriesChanged;
 
   const MainScaffold({
     super.key,
@@ -21,6 +22,7 @@ class MainScaffold extends StatelessWidget {
     required this.classifierService,
     this.floatingActionButton,
     this.bottomNavigationBar,
+    this.onCategoriesChanged,
   });
 
   @override
@@ -43,7 +45,7 @@ class MainScaffold extends StatelessWidget {
             icon: const Icon(Icons.dark_mode),
           ),
 
-          TrainMenuButton(classifierService: classifierService),
+          TrainMenuButton(classifierService: classifierService,onCategoriesChanged: onCategoriesChanged,),
         ],
       ),
 

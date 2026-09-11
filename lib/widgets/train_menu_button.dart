@@ -6,8 +6,13 @@ import '../screens/preset_category_screen.dart';
 
 class TrainMenuButton extends StatelessWidget {
   final ClassifierService classifierService;
+  final Future<void> Function()? onCategoriesChanged;
 
-  const TrainMenuButton({super.key, required this.classifierService});
+  const TrainMenuButton({
+    super.key,
+    required this.classifierService,
+    this.onCategoriesChanged,
+  });
 
   Future<void> _openMenu(BuildContext context) async {
     await showModalBottomSheet(
@@ -17,21 +22,22 @@ class TrainMenuButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TrainButton(
-                classifierService: classifierService,
-              ),
+              TrainButton(classifierService: classifierService),
               ListTile(
                 leading: const Icon(Icons.playlist_add),
                 title: const Text('プリセットを追加'),
-                onTap: () {
+                onTap: () async {
                   Navigator.of(sheetContext).pop();
-                  Navigator.of(context).push(
+
+                  await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) {
                         return PresetCategoryScreen(classifierService: classifierService,);
                       },
                     ),
                   );
+
+                  await onCategoriesChanged?.call();
                 },
               ),
             ],

@@ -308,6 +308,7 @@ class _MemoScreenState extends State<MemoScreen> {
           ],
         ),
       ),
+      onCategoriesChanged: _loadCategories,
     );
   }
 

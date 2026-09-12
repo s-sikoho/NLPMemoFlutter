@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/classifier_service.dart';
 import '../services/notification_service.dart';
@@ -30,6 +32,10 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
+  final GlobalKey _calendarKey = GlobalKey();
+  final GlobalKey _todayButtonKey = GlobalKey();
+  final GlobalKey _dayMemoButtonKey = GlobalKey();
+  BuildContext? _showcaseContext;
   final MemoRepository _memoRepository = MemoRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
   DateTime _selectedDate = DateTime.now();
@@ -62,6 +68,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _categories = categories;
       _memos = memos;
       _isLoading = false;
+    });
+    _showTutorialIfNeeded();
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final hasSeen = prefs.getBool('calendar_screen_tutorial_seen') ?? false;
+
+    if (hasSeen) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _showcaseContext == null) {
+        return;
+      }
+
+      ShowCaseWidget.of(_showcaseContext!)
+          .startShowCase([_calendarKey, _todayButtonKey, _dayMemoButtonKey]);
     });
   }
 
@@ -137,10 +163,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     await _loadMemos();
   }
 
-  void _backToMemoScreen() {
-    Navigator.of(context).pop();
-  }
-
   void _goPreviousMonth() {
     final newMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
     setState(() {
@@ -171,65 +193,99 @@ class _CalendarScreenState extends State<CalendarScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return MainScaffold(
-      title: const Text('カレンダー'),
+    return ShowCaseWidget(
+      onFinish: () async {
+        final prefs = await SharedPreferences.getInstance();
 
-      body: Stack(
-        children: [
-          Column(
+        await prefs.setBool('calendar_screen_tutorial_seen', true);
+      },
+      builder: (showcaseContext) {
+        _showcaseContext = showcaseContext;
+
+        return MainScaffold(
+          title: const Text('カレンダー'),
+
+          body: Stack(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
                 children: [
-                  IconButton(
-                    onPressed: _goPreviousMonth,
-                    icon: const Icon(Icons.chevron_left),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: _goPreviousMonth,
+                        icon: const Icon(Icons.chevron_left),
+                      ),
+                      Text(
+                        '${_focusedMonth.year}年'
+                        '${_focusedMonth.month}月',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _goNextMonth,
+                        icon: const Icon(Icons.chevron_right),
+                      ),
+                    ],
                   ),
-                  Text(
-                    '${_focusedMonth.year}年${_focusedMonth.month}月',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+
+                  Showcase(
+                    key: _calendarKey,
+                    title: 'カレンダー',
+                    description: '日付を選択すると、その日に設定されているメモを確認できます。',
+                    child: _buildCalendar(),
                   ),
-                  IconButton(
-                    onPressed: _goNextMonth,
-                    icon: const Icon(Icons.chevron_right),
-                  ),
+
+                  const Divider(),
+
+                  _buildSelectedDateHeader(),
+
+                  Expanded(child: _buildSelectedMemoList()),
                 ],
               ),
-              _buildCalendar(),
-              const Divider(),
-              _buildSelectedDateHeader(),
-              Expanded(child: _buildSelectedMemoList()),
+
+              Positioned(
+                left: 16,
+                bottom: 16,
+                child: Showcase(
+                  key: _todayButtonKey,
+                  title: '今日',
+                  description: '今日の日付と現在の月へ戻ります。',
+                  child: FloatingActionButton.extended(
+                    heroTag: 'todayButton',
+                    onPressed: _goToday,
+                    icon: const Icon(Icons.today),
+                    label: const Text('今日'),
+                  ),
+                ),
+              ),
+
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: Showcase(
+                  key: _dayMemoButtonKey,
+                  title: 'この日のメモ',
+                  description: '選択している日付のメモ一覧を開きます。',
+                  child: FloatingActionButton.extended(
+                    heroTag: 'detailButton',
+                    onPressed: () {
+                      _openDayScreen(_selectedDate);
+                    },
+                    icon: const Icon(Icons.open_in_new),
+                    label: const Text('この日のメモ'),
+                  ),
+                ),
+              ),
             ],
           ),
-          Positioned(
-            left: 16,
-            bottom: 16,
-            child: FloatingActionButton.extended(
-              heroTag: 'todayButton',
-              onPressed: _goToday,
-              icon: const Icon(Icons.today),
-              label: const Text('今日'),
-            ),
-          ),
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: FloatingActionButton.extended(
-              heroTag: 'detailButton',
-              onPressed: () {
-                _openDayScreen(_selectedDate);
-              },
-              icon: const Icon(Icons.open_in_new),
-              label: const Text('この日のメモ'),
-            ),
-          ),
-        ],
-      ),
-      onToggleTheme: widget.onToggleTheme,
-      classifierService: widget.classifierService,
+
+          onToggleTheme: widget.onToggleTheme,
+          classifierService: widget.classifierService,
+        );
+      },
     );
   }
 
@@ -273,8 +329,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildDayCell(DateTime date, List<Memo> memos) {
-    final now = DateTime.now();
-
     final isSelected =
         date.year == _selectedDate.year &&
         date.month == _selectedDate.month &&

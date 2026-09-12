@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/memo.dart';
 import '../models/category.dart';
@@ -38,6 +40,7 @@ class MemoScreen extends StatefulWidget {
 }
 
 class _MemoScreenState extends State<MemoScreen> {
+  BuildContext? _showcaseContext;
   final MemoRepository _memoRepository = MemoRepository();
   late final MemoDeleteService _memoDeleteService;
   final CategoryRepository _categoryRepository = CategoryRepository();
@@ -52,6 +55,11 @@ class _MemoScreenState extends State<MemoScreen> {
     Colors.pink,
     Colors.brown,
   ];
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _themeKey = GlobalKey();
+  final GlobalKey _trainKey = GlobalKey();
+  final GlobalKey _calendarKey = GlobalKey();
+  final GlobalKey _addMemoKey = GlobalKey();
   List<Memo> _memos = [];
   List<Category> _categories = [];
 
@@ -95,6 +103,34 @@ class _MemoScreenState extends State<MemoScreen> {
       _memos = memos;
       _categories = categories;
       _isLoading = false;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showTutorialIfNeeded();
+    });
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final hasSeenTutorial = prefs.getBool('memo_screen_tutorial_seen') ?? false;
+
+    if (hasSeenTutorial) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _showcaseContext == null) {
+        return;
+      }
+
+      ShowCaseWidget.of(_showcaseContext!).startShowCase([
+        _searchKey,
+        _themeKey,
+        _trainKey,
+        _calendarKey,
+        _addMemoKey,
+      ]);
     });
   }
 
@@ -272,43 +308,70 @@ class _MemoScreenState extends State<MemoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MainScaffold(
-      title: TextField(
-        decoration: const InputDecoration(
-          hintText: 'メモを検索',
-          prefixIcon: Icon(Icons.search),
-          border: InputBorder.none,
-        ),
-        onChanged: (value) {
-          _searchKeyword = value;
-          _loadMemos();
-        },
-        onTapOutside: (_) {
-          FocusScope.of(context).unfocus();
-        },
-      ),
+    return ShowCaseWidget(
+      onFinish: () async {
+        final prefs = await SharedPreferences.getInstance();
 
-      body: _buildBody(),
-
-      onToggleTheme: widget.onToggleTheme,
-      classifierService: widget.classifierService,
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openCreateScreen,
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: _openCalendarScreen,
-              tooltip: 'メモ一覧',
-              icon: Icon(Icons.calendar_month),
+        await prefs.setBool('memo_screen_tutorial_seen', true);
+      },
+      builder: (showcaseContext) {
+        _showcaseContext = showcaseContext;
+        return MainScaffold(
+          title: Showcase(
+            key: _searchKey,
+            title: '検索',
+            description: 'タイトルや本文からメモを検索できます。',
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'メモを検索',
+                prefixIcon: Icon(Icons.search),
+                border: InputBorder.none,
+              ),
+              onChanged: (value) {
+                _searchKeyword = value;
+                _loadMemos();
+              },
+              onTapOutside: (_) {
+                FocusScope.of(context).unfocus();
+              },
             ),
-          ],
-        ),
-      ),
-      onCategoriesChanged: _loadCategories,
+          ),
+          themeButtonKey: _themeKey,
+          trainButtonKey: _trainKey,
+
+          body: _buildBody(),
+
+          onToggleTheme: widget.onToggleTheme,
+          classifierService: widget.classifierService,
+
+          floatingActionButton: Showcase(
+            key: _addMemoKey,
+            title: 'メモを追加',
+            description: 'ここから新しいメモを作成できます。',
+            child: FloatingActionButton(
+              onPressed: _openCreateScreen,
+              child: const Icon(Icons.add),
+            ),
+          ),
+          bottomNavigationBar: SafeArea(
+            child: Row(
+              children: [
+                Showcase(
+                  key: _calendarKey,
+                  title: 'カレンダー',
+                  description: '日時付きメモをカレンダーで確認できます。',
+                  child: IconButton(
+                    onPressed: _openCalendarScreen,
+                    tooltip: 'メモ一覧',
+                    icon: const Icon(Icons.calendar_month),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          onCategoriesChanged: _loadCategories,
+        );
+      },
     );
   }
 

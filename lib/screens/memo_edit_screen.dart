@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/category.dart';
 import '../models/memo.dart';
@@ -39,6 +41,11 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final CategoryDeleteService _categoryDeleteService = CategoryDeleteService();
+  final GlobalKey _categorySelectorKey = GlobalKey();
+  final GlobalKey _predictCategoryKey = GlobalKey();
+  final GlobalKey _scheduleKey = GlobalKey();
+
+  BuildContext? _showcaseContext;
 
   final _categoryColors = <Color>[
     Colors.blue,
@@ -89,6 +96,29 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         _selectedCategoryId = categories.first.id;
       }
       _isLoading = false;
+    });
+    _showTutorialIfNeeded();
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final hasSeen = prefs.getBool('memo_edit_screen_tutorial_seen') ?? false;
+
+    if (hasSeen) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _showcaseContext == null) {
+        return;
+      }
+
+      ShowCaseWidget.of(_showcaseContext!).startShowCase([
+        _categorySelectorKey,
+        _predictCategoryKey,
+        _scheduleKey,
+      ]);
     });
   }
 
@@ -410,117 +440,154 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditMode ? 'メモを編集' : '新しいメモ'),
-        actions: [
-          IconButton(
-            onPressed: _isLoading ? null : _save,
-            icon: const Icon(Icons.check),
-          ),
-        ],
-      ),
+    return ShowCaseWidget(
+      onFinish: () async {
+        final prefs = await SharedPreferences.getInstance();
 
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      hintText: 'タイトル',
-                      border: InputBorder.none,
-                    ),
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+        await prefs.setBool('memo_edit_screen_tutorial_seen', true);
+      },
+      builder: (showcaseContext) {
+        _showcaseContext = showcaseContext;
 
-                  CategorySelector(
-                    selectedCategory: _getSelectedCategory(),
-                    onTap: () {
-                      _showCategorySelector();
-                    },
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: _isPredicting ? null : _predictCategory,
-                      icon: _isPredicting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.auto_awesome),
-                      label: Text(_isPredicting ? '予測中' : 'カテゴリを自動予測'),
-                    ),
-                  ),
-
-                  if (_scheduledAt == null)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: _selectScheduleDateTime,
-                        icon: const Icon(Icons.calendar_month),
-                        label: const Text('日時を追加'),
-                      ),
-                    ),
-
-                  if (_scheduledAt != null)
-                    Row(
-                      children: [
-                        const Icon(Icons.schedule),
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: _selectScheduleDateTime,
-                          child: Text(_formatScheduleDate(_scheduledAt!)),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        InkWell(
-                          onTap: _editScheduleTime,
-                          child: Text(_formatScheduleTime(_scheduledAt!)),
-                        ),
-
-                        const Spacer(),
-                        Icon(
-                          _notificationEnabled
-                              ? Icons.notifications
-                              : Icons.notifications_none,
-                        ),
-                        Switch(
-                          value: _notificationEnabled,
-                          onChanged: _setNotificationEnabled,
-                        ),
-                        IconButton(
-                          onPressed: _clearSchedule,
-                          icon: const Icon(Icons.close),
-                        ),
-                      ],
-                    ),
-
-                  const SizedBox(height: 16),
-
-                  Expanded(
-                    child: TextField(
-                      controller: _contentController,
-                      maxLines: null,
-                      expands: true,
-                      textAlignVertical: TextAlignVertical.top,
-                      decoration: const InputDecoration(
-                        hintText: 'メモを書いてください',
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ],
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(_isEditMode ? 'メモを編集' : '新しいメモ'),
+            actions: [
+              IconButton(
+                onPressed: _isLoading ? null : _save,
+                icon: const Icon(Icons.check),
               ),
-            ),
+            ],
+          ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          hintText: 'タイトル',
+                          border: InputBorder.none,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      Showcase(
+                        key: _categorySelectorKey,
+                        title: 'カテゴリ',
+                        description: 'このメモを保存するカテゴリを選択できます。',
+                        child: CategorySelector(
+                          selectedCategory: _getSelectedCategory(),
+                          onTap: () {
+                            _showCategorySelector();
+                          },
+                        ),
+                      ),
+
+                      Showcase(
+                        key: _predictCategoryKey,
+                        title: 'カテゴリを自動予測',
+                        description: 'タイトルと本文の内容から、カテゴリを自動で予測できます。',
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: _isPredicting ? null : _predictCategory,
+                            icon: _isPredicting
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.auto_awesome),
+                            label: Text(_isPredicting ? '予測中' : 'カテゴリを自動予測'),
+                          ),
+                        ),
+                      ),
+
+                      if (_scheduledAt == null)
+                        Showcase(
+                          key: _scheduleKey,
+                          title: '日時と通知',
+                          description: 'ここから予定の日時や通知の設定ができます。',
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: _selectScheduleDateTime,
+                              icon: const Icon(Icons.calendar_month),
+                              label: const Text('日時を追加'),
+                            ),
+                          ),
+                        ),
+
+                      if (_scheduledAt != null)
+                        Showcase(
+                          key: _scheduleKey,
+                          title: '日時と通知',
+                          description: 'ここから予定の日時や通知のオン・オフを設定できます。',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.schedule),
+                              const SizedBox(width: 8),
+
+                              InkWell(
+                                onTap: _selectScheduleDateTime,
+                                child: Text(_formatScheduleDate(_scheduledAt!)),
+                              ),
+
+                              const SizedBox(width: 12),
+
+                              InkWell(
+                                onTap: _editScheduleTime,
+                                child: Text(_formatScheduleTime(_scheduledAt!)),
+                              ),
+
+                              const Spacer(),
+
+                              Icon(
+                                _notificationEnabled
+                                    ? Icons.notifications
+                                    : Icons.notifications_none,
+                              ),
+
+                              Switch(
+                                value: _notificationEnabled,
+                                onChanged: _setNotificationEnabled,
+                              ),
+
+                              IconButton(
+                                onPressed: _clearSchedule,
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      const SizedBox(height: 16),
+
+                      Expanded(
+                        child: TextField(
+                          controller: _contentController,
+                          maxLines: null,
+                          expands: true,
+                          textAlignVertical: TextAlignVertical.top,
+                          decoration: const InputDecoration(
+                            hintText: 'メモを書いてください',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        );
+      },
     );
   }
 }

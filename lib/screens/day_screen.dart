@@ -309,8 +309,9 @@ class _DayScreenState extends State<DayScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text(_formatScheduleDate(widget.date),
-            style: Theme.of(context).textTheme.titleLarge
+            child: Text(
+              _formatScheduleDate(widget.date),
+              style: Theme.of(context).textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
